@@ -9,29 +9,34 @@ export type EditorBlock = {
 };
 
 interface EditorState {
+  // --- The Data ---
   title: string;
   slug: string;
   blocks: EditorBlock[];
   activeBlockId: string | null;
 
+  // --- Basic State Setters ---
   setTitle: (title: string) => void;
   setSlug: (slug: string) => void;
   setActiveBlock: (id: string | null) => void;
 
+  // --- Block Manipulation Actions ---
   // Notice we added an optional parentId so you can add blocks directly inside sections
   addBlock: (type: string, initialData?: any, parentId?: string | null) => void;
   updateBlock: (id: string, newData: any) => void;
   removeBlock: (id: string) => void;
+
   // Reordering in a tree requires knowing WHICH array the block is currently in
   reorderBlocks: (
     containerId: string | null,
     oldIndex: number,
     newIndex: number,
   ) => void;
+
+  // Moves a block from one part of the tree to another
   moveBlockBetweenContainers: (
     activeId: string,
-    overContainerId: string | null,
-    newIndex: number,
+    targetContainerId: string | null,
   ) => void;
 }
 
@@ -122,10 +127,52 @@ export const useEditorStore = create<EditorState>((set) => ({
       return state;
     }),
 
-  moveBlockBetweenContainers: (activeId, overContainerId, newIndex) =>
+  moveBlockBetweenContainers: (activeId, targetContainerId) =>
     set((state) => {
-      // Logic for dragging a button out of one section and into another
-      // (We will wire this up to dnd-kit in the next step)
-      return state;
+      // 1. Create a deep copy of the blocks to safely mutate
+      const newBlocks = JSON.parse(JSON.stringify(state.blocks));
+      let foundBlock: EditorBlock | null = null; // Added explicit type here
+
+      // 2. Helper to find and remove the block from its current location
+      const removeNode = (nodes: EditorBlock[]): boolean => {
+        for (let i = 0; i < nodes.length; i++) {
+          if (nodes[i].id === activeId) {
+            foundBlock = nodes.splice(i, 1)[0];
+            return true;
+          }
+          // THE FIX: Extract to a variable so TypeScript knows it is safely defined
+          const children = nodes[i].children;
+          if (children && removeNode(children)) return true;
+        }
+        return false;
+      };
+
+      removeNode(newBlocks);
+
+      // Failsafe in case the block wasn't found
+      if (!foundBlock) return state;
+
+      // 3. Helper to drop it into the new target container
+      if (targetContainerId === null) {
+        newBlocks.push(foundBlock); // Drop on main canvas root
+      } else {
+        const addNode = (nodes: EditorBlock[]): boolean => {
+          for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].id === targetContainerId) {
+              nodes[i].children = nodes[i].children || [];
+              // We use foundBlock! here because we already checked if(!foundBlock) above
+              nodes[i].children.push(foundBlock!);
+              return true;
+            }
+            // THE FIX: Extract to a variable again for the addNode recursive call
+            const children = nodes[i].children;
+            if (children && addNode(children)) return true;
+          }
+          return false;
+        };
+        addNode(newBlocks);
+      }
+
+      return { blocks: newBlocks };
     }),
 }));

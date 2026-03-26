@@ -1,10 +1,32 @@
 "use client";
 
 import { useEditorStore } from "@/store/useEditorStore";
-import { BarChart3, LayoutTemplate } from "lucide-react";
+import {
+  BarChart3,
+  Columns,
+  Image as ImageIcon,
+  LayoutTemplate,
+  Type,
+} from "lucide-react";
 
 export default function EditorSidebar() {
   const { addBlock, activeBlockId, blocks } = useEditorStore();
+
+  const handleAddText = () => {
+    addBlock(
+      "TextBlock",
+      { content: "New paragraph text", fontSize: 16, tag: "p" },
+      activeBlockId,
+    );
+  };
+
+  const handleAddImage = () => {
+    addBlock("ImageBlock", { width: 100 }, activeBlockId);
+  };
+
+  const handleAddGrid = () => {
+    addBlock("GridContainer", { columns: 2, gap: 24 }, activeBlockId);
+  };
 
   const handleAddHero = () => {
     addBlock("HeroSection", {
@@ -91,6 +113,27 @@ export default function EditorSidebar() {
         >
           <BarChart3 size={18} className="text-emerald-500" />
           Metrics Grid
+        </button>
+
+        <button
+          onClick={handleAddText}
+          className="w-full flex items-center gap-3 text-left px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-sm transition-all text-slate-700 font-medium text-sm"
+        >
+          <Type size={18} className="text-slate-500" /> Typography
+        </button>
+
+        <button
+          onClick={handleAddImage}
+          className="w-full flex items-center gap-3 text-left px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-sm transition-all text-slate-700 font-medium text-sm"
+        >
+          <ImageIcon size={18} className="text-purple-500" /> Image
+        </button>
+
+        <button
+          onClick={handleAddGrid}
+          className="w-full flex items-center gap-3 text-left px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-sm transition-all text-slate-700 font-medium text-sm"
+        >
+          <Columns size={18} className="text-orange-500" /> Grid Layout
         </button>
       </div>
     </div>
