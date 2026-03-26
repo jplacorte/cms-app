@@ -3,6 +3,10 @@ export interface HeroBlockProps {
   subheading?: string;
   ctaText?: string;
   ctaLink?: string;
+  // --- New Customization Props ---
+  buttonBgColor?: string;
+  buttonTextColor?: string;
+  buttonRadius?: string;
 }
 
 export default function HeroBlock({
@@ -10,6 +14,9 @@ export default function HeroBlock({
   subheading,
   ctaText,
   ctaLink,
+  buttonBgColor = "#2563eb", // Default blue-600
+  buttonTextColor = "#ffffff",
+  buttonRadius = "9999px", // Default rounded-full
 }: HeroBlockProps) {
   return (
     <section className="bg-slate-900 text-white py-24 px-6 text-center rounded-3xl mx-4 my-8 shadow-xl">
@@ -25,7 +32,13 @@ export default function HeroBlock({
         {ctaText && ctaLink && (
           <a
             href={ctaLink}
-            className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 px-10 rounded-full transition-all duration-200 shadow-lg hover:shadow-blue-500/30"
+            // We use inline styles here so the database can inject ANY hex color the user picks
+            style={{
+              backgroundColor: buttonBgColor,
+              color: buttonTextColor,
+              borderRadius: buttonRadius,
+            }}
+            className="inline-flex items-center justify-center font-semibold py-4 px-10 transition-all duration-200 shadow-lg hover:opacity-90"
           >
             {ctaText}
           </a>

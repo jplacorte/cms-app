@@ -36,7 +36,8 @@ function SortableBlock({
   index: number;
   totalBlocks: number;
 }) {
-  const { moveBlock, removeBlock } = useEditorStore();
+  const { activeBlockId, moveBlock, removeBlock, setActiveBlock } =
+    useEditorStore();
 
   const {
     attributes,
@@ -68,10 +69,14 @@ function SortableBlock({
     <div
       ref={setNodeRef}
       style={style}
+      // Add the onClick handler here:
+      onClick={() => setActiveBlock(block.id)}
       className={`group relative bg-white rounded-xl shadow-sm ring-1 ring-slate-200 transition-all ${
         isDragging
           ? "ring-2 ring-blue-500 shadow-lg opacity-80"
-          : "hover:ring-2 hover:ring-blue-400"
+          : activeBlockId === block.id
+            ? "ring-2 ring-indigo-500 shadow-md" // Highlight the active block!
+            : "hover:ring-2 hover:ring-blue-400"
       }`}
     >
       {/* Drag Handle (Left side) */}

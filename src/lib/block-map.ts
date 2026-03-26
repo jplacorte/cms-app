@@ -1,9 +1,12 @@
-import HeroBlock from "@/components/blocks/HeroBlock";
-import StatCardsBlock from "@/components/blocks/StatCardsBlock";
-import React from "react";
+import ContainerSection from "@/components/blocks/ContainerSection";
+import CustomButton from "@/components/blocks/CustomButton";
+import HeroBlock from "../components/blocks/HeroBlock";
+import StatCardsBlock from "../components/blocks/StatCardsBlock";
+// ... your other imports
 
-// We map the exact string types from our JSON to the React components
 export const BlockRegistry: Record<string, React.ElementType> = {
   HeroSection: HeroBlock,
   MetricsGrid: StatCardsBlock,
+  CustomButton: CustomButton,
+  ContainerSection: ContainerSection,
 };

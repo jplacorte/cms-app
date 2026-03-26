@@ -4,7 +4,7 @@ import { useEditorStore } from "@/store/useEditorStore";
 import { BarChart3, LayoutTemplate } from "lucide-react";
 
 export default function EditorSidebar() {
-  const addBlock = useEditorStore((state) => state.addBlock);
+  const { addBlock, activeBlockId, blocks } = useEditorStore();
 
   const handleAddHero = () => {
     addBlock("HeroSection", {
@@ -13,6 +13,25 @@ export default function EditorSidebar() {
       ctaText: "View Projects",
       ctaLink: "/projects",
     });
+  };
+
+  const handleAddAtomic = (type: string, defaultData: any) => {
+    // Check if the currently clicked block is a Container. If yes, add it INSIDE.
+    // Otherwise, add it to the bottom of the page.
+    // (You would write a quick helper to check the activeBlock's type here)
+    addBlock(type, defaultData, activeBlockId);
+  };
+
+  const handleAddButton = () => {
+    handleAddAtomic("CustomButton", {
+      text: "Learn More",
+      bgColor: "#2563eb",
+      textColor: "#ffffff",
+    });
+  };
+
+  const handleAddSection = () => {
+    addBlock("ContainerSection", { bgColor: "#ffffff", paddingY: 64, gap: 16 });
   };
 
   const handleAddMetrics = () => {
@@ -51,6 +70,19 @@ export default function EditorSidebar() {
         >
           <LayoutTemplate size={18} className="text-blue-500" />
           Hero Section
+        </button>
+
+        <button
+          onClick={handleAddSection}
+          className="w-full flex items-center gap-3 text-left px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-sm transition-all text-slate-700 font-medium text-sm"
+        >
+          Add Section
+        </button>
+        <button
+          onClick={handleAddButton}
+          className="w-full flex items-center gap-3 text-left px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg hover:border-blue-500 hover:shadow-sm transition-all text-slate-700 font-medium text-sm"
+        >
+          Add Button
         </button>
 
         <button
