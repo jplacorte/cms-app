@@ -3,10 +3,13 @@ export interface HeroBlockProps {
   subheading?: string;
   ctaText?: string;
   ctaLink?: string;
-  // --- New Customization Props ---
+  bgColor?: string;
+  headingColor?: string;
+  subheadingColor?: string;
   buttonBgColor?: string;
   buttonTextColor?: string;
   buttonRadius?: string;
+  textAlign?: string;
 }
 
 export default function HeroBlock({
@@ -14,25 +17,40 @@ export default function HeroBlock({
   subheading,
   ctaText,
   ctaLink,
-  buttonBgColor = "#2563eb", // Default blue-600
+  bgColor = "#0f172a",
+  headingColor = "#ffffff",
+  subheadingColor = "#94a3b8",
+  buttonBgColor = "#2563eb",
   buttonTextColor = "#ffffff",
-  buttonRadius = "9999px", // Default rounded-full
+  buttonRadius = "9999px",
+  textAlign = "center",
 }: HeroBlockProps) {
   return (
-    <section className="bg-slate-900 text-white py-24 px-6 text-center rounded-3xl mx-4 my-8 shadow-xl">
+    <section
+      style={{
+        backgroundColor: bgColor,
+        textAlign: textAlign as React.CSSProperties["textAlign"],
+      }}
+      className="py-24 px-6 rounded-3xl mx-4 my-8 shadow-xl"
+    >
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl mb-6">
+        <h1
+          style={{ color: headingColor }}
+          className="text-5xl font-extrabold tracking-tight sm:text-6xl mb-6"
+        >
           {heading}
         </h1>
         {subheading && (
-          <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p
+            style={{ color: subheadingColor }}
+            className="text-xl mb-10 max-w-2xl mx-auto leading-relaxed"
+          >
             {subheading}
           </p>
         )}
         {ctaText && ctaLink && (
           <a
             href={ctaLink}
-            // We use inline styles here so the database can inject ANY hex color the user picks
             style={{
               backgroundColor: buttonBgColor,
               color: buttonTextColor,

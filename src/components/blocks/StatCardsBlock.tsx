@@ -1,13 +1,4 @@
-// We define the expected shape of the data prop
-export interface StatCardData {
-  id: string;
-  layoutType: "standard" | "highlight";
-  title: string;
-  value: string;
-  subtext: string;
-  badge?: { text: string; variant: "default" | "alert" };
-  progressPercentage?: number;
-}
+import { StatCardData } from "@/lib/types";
 
 export interface StatCardsBlockProps {
   metrics: StatCardData[];

@@ -1,50 +1,42 @@
+"use client";
+
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 
 export type EditorBlock = {
   id: string;
   type: string;
-  data: any;
-  children?: EditorBlock[]; // <-- The magic key for nesting!
+  data: Record<string, unknown>;
+  children?: EditorBlock[];
 };
 
 interface EditorState {
-  // --- The Data ---
   title: string;
   slug: string;
   blocks: EditorBlock[];
   activeBlockId: string | null;
-
-  // --- Basic State Setters ---
   setTitle: (title: string) => void;
   setSlug: (slug: string) => void;
   setActiveBlock: (id: string | null) => void;
-
-  // --- Block Manipulation Actions ---
-  // Notice we added an optional parentId so you can add blocks directly inside sections
-  addBlock: (type: string, initialData?: any, parentId?: string | null) => void;
-  updateBlock: (id: string, newData: any) => void;
+  addBlock: (type: string, initialData?: Record<string, unknown>, parentId?: string | null) => void;
+  updateBlock: (id: string, newData: Record<string, unknown>) => void;
   removeBlock: (id: string) => void;
-
-  // Reordering in a tree requires knowing WHICH array the block is currently in
   reorderBlocks: (
     containerId: string | null,
     oldIndex: number,
     newIndex: number,
   ) => void;
-
-  // Moves a block from one part of the tree to another
   moveBlockBetweenContainers: (
     activeId: string,
     targetContainerId: string | null,
   ) => void;
 }
 
-// --- Recursive Helpers ---
+// Recursive Helpers
 const updateInTree = (
   blocks: EditorBlock[],
   id: string,
-  newData: any,
+  newData: Record<string, unknown>,
 ): EditorBlock[] => {
   return blocks.map((block) => {
     if (block.id === id)
@@ -70,15 +62,13 @@ const addToTree = (
   newBlock: EditorBlock,
 ): EditorBlock[] => {
   return blocks.map((block) => {
-    if (block.id === parentId) {
+    if (block.id === parentId)
       return { ...block, children: [...(block.children || []), newBlock] };
-    }
-    if (block.children) {
+    if (block.children)
       return {
         ...block,
         children: addToTree(block.children, parentId, newBlock),
       };
-    }
     return block;
   });
 };
@@ -96,51 +86,53 @@ export const useEditorStore = create<EditorState>((set) => ({
   addBlock: (type, initialData = {}, parentId = null) =>
     set((state) => {
       const newBlock = { id: uuidv4(), type, data: initialData, children: [] };
-      if (!parentId) {
-        return { blocks: [...state.blocks, newBlock] }; // Add to root
-      }
-      return { blocks: addToTree(state.blocks, parentId, newBlock) }; // Add to specific container
+      if (!parentId) return { blocks: [...state.blocks, newBlock] };
+      return { blocks: addToTree(state.blocks, parentId, newBlock) };
     }),
 
   updateBlock: (id, newData) =>
     set((state) => ({ blocks: updateInTree(state.blocks, id, newData) })),
 
   removeBlock: (id) =>
-    set((state) => {
-      const newBlocks = removeFromTree(state.blocks, id);
-      return {
-        blocks: newBlocks,
-        activeBlockId: state.activeBlockId === id ? null : state.activeBlockId,
-      };
-    }),
+    set((state) => ({
+      blocks: removeFromTree(state.blocks, id),
+      activeBlockId: state.activeBlockId === id ? null : state.activeBlockId,
+    })),
 
   reorderBlocks: (containerId, oldIndex, newIndex) =>
     set((state) => {
-      // Simplified for this step: Currently handles root reordering.
-      // Full nested reordering requires traversing and splicing the exact array.
-      if (!containerId) {
-        const updated = [...state.blocks];
-        const [moved] = updated.splice(oldIndex, 1);
-        updated.splice(newIndex, 0, moved);
-        return { blocks: updated };
-      }
-      return state;
+      const newBlocks = JSON.parse(JSON.stringify(state.blocks));
+      const reorderInTree = (nodes: EditorBlock[]): boolean => {
+        if (!containerId) {
+          const [moved] = nodes.splice(oldIndex, 1);
+          nodes.splice(newIndex, 0, moved);
+          return true;
+        }
+        for (const node of nodes) {
+          if (node.id === containerId && node.children) {
+            const [moved] = node.children.splice(oldIndex, 1);
+            node.children.splice(newIndex, 0, moved);
+            return true;
+          }
+          if (node.children && reorderInTree(node.children)) return true;
+        }
+        return false;
+      };
+      reorderInTree(newBlocks);
+      return { blocks: newBlocks };
     }),
 
   moveBlockBetweenContainers: (activeId, targetContainerId) =>
     set((state) => {
-      // 1. Create a deep copy of the blocks to safely mutate
       const newBlocks = JSON.parse(JSON.stringify(state.blocks));
-      let foundBlock: EditorBlock | null = null; // Added explicit type here
+      let foundBlock: EditorBlock | null = null;
 
-      // 2. Helper to find and remove the block from its current location
       const removeNode = (nodes: EditorBlock[]): boolean => {
         for (let i = 0; i < nodes.length; i++) {
           if (nodes[i].id === activeId) {
             foundBlock = nodes.splice(i, 1)[0];
             return true;
           }
-          // THE FIX: Extract to a variable so TypeScript knows it is safely defined
           const children = nodes[i].children;
           if (children && removeNode(children)) return true;
         }
@@ -148,31 +140,25 @@ export const useEditorStore = create<EditorState>((set) => ({
       };
 
       removeNode(newBlocks);
-
-      // Failsafe in case the block wasn't found
       if (!foundBlock) return state;
 
-      // 3. Helper to drop it into the new target container
       if (targetContainerId === null) {
-        newBlocks.push(foundBlock); // Drop on main canvas root
+        newBlocks.push(foundBlock);
       } else {
         const addNode = (nodes: EditorBlock[]): boolean => {
           for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].id === targetContainerId) {
-              nodes[i].children = nodes[i].children || [];
-              // We use foundBlock! here because we already checked if(!foundBlock) above
-              nodes[i].children.push(foundBlock!);
+            const node = nodes[i]; // FIX: Local variable allows type narrowing
+            if (node.id === targetContainerId) {
+              if (!node.children) node.children = [];
+              node.children.push(foundBlock!); // Now safe
               return true;
             }
-            // THE FIX: Extract to a variable again for the addNode recursive call
-            const children = nodes[i].children;
-            if (children && addNode(children)) return true;
+            if (node.children && addNode(node.children)) return true;
           }
           return false;
         };
         addNode(newBlocks);
       }
-
       return { blocks: newBlocks };
     }),
 }));

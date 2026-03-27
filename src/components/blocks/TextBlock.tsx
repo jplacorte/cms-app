@@ -1,23 +1,36 @@
-export default function TextBlock(props: any) {
-  const Tag = props.tag || "p";
+"use client";
+
+import { TextBlockProps } from "@/lib/types";
+
+export default function TextBlock({
+  content = "New paragraph text",
+  tag = "p",
+  textColor = "#334155",
+  fontSize = 16,
+  fontWeight = "400",
+  textAlign = "left",
+  lineHeight = "1.6",
+  letterSpacing = 0,
+}: TextBlockProps) {
+  const Tag = tag as keyof React.JSX.IntrinsicElements;
 
   return (
     <Tag
       style={{
-        color: props.textColor || "#334155",
-        fontSize: `${props.fontSize || 16}px`,
-        fontWeight: props.fontWeight || "400",
-        textAlign: props.textAlign || "left",
-        lineHeight: props.lineHeight || "1.6",
-        margin: props.margin || "0px",
+        color: textColor,
+        fontSize: `${fontSize}px`,
+        fontWeight,
+        textAlign: textAlign as React.CSSProperties["textAlign"],
+        lineHeight,
+        letterSpacing: `${letterSpacing}px`,
         width: "100%",
         display: "block",
         wordBreak: "break-word",
         whiteSpace: "normal",
-        userSelect: "none", // FIX: Prevents that blue highlight from blocking you
+        userSelect: "none",
       }}
     >
-      {props.content || "New paragraph text"}
+      {content}
     </Tag>
   );
 }

@@ -1,27 +1,43 @@
-export default function CustomButton(props: any) {
+import { CustomButtonProps } from "@/lib/types";
+
+export default function CustomButton({
+  text = "Click Me",
+  href = "#",
+  bgColor = "#000000",
+  textColor = "#ffffff",
+  borderRadius = "4px",
+  paddingX = 24,
+  paddingY = 12,
+  fontSize = 16,
+  fontWeight = "600",
+  borderWidth = 0,
+  borderColor = "#000000",
+}: CustomButtonProps) {
   return (
     <a
-      href={props.href || "#"}
+      href={href}
       style={{
-        backgroundColor: props.bgColor || "#000000",
-        color: props.textColor || "#ffffff",
-        borderRadius: props.borderRadius || "4px",
-        padding: `${props.paddingY || 12}px ${props.paddingX || 24}px`,
-        fontSize: `${props.fontSize || 16}px`,
+        backgroundColor: bgColor,
+        color: textColor,
+        borderRadius,
+        padding: `${paddingY}px ${paddingX}px`,
+        fontSize: `${fontSize}px`,
+        fontWeight,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         width: "100%",
         height: "100%",
-        minHeight: "40px", // FIX: Prevents the button from collapsing to 0 height
-        boxSizing: "border-box", // FIX: Keeps padding inside the bounding box
-        border: props.borderWidth
-          ? `${props.borderWidth}px solid ${props.borderColor}`
+        minHeight: "40px",
+        boxSizing: "border-box",
+        border: borderWidth
+          ? `${borderWidth}px solid ${borderColor}`
           : "none",
         textDecoration: "none",
+        transition: "opacity 0.2s ease",
       }}
     >
-      {props.text || "Click Me"}
+      {text}
     </a>
   );
 }

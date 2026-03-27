@@ -1,27 +1,45 @@
+"use client";
+
 import { BlockRegistry } from "@/lib/block-map";
+import { ContainerSectionProps } from "@/lib/types";
+import { EditorBlock } from "@/store/useEditorStore";
 import { useDroppable } from "@dnd-kit/core";
 
-export default function ContainerSection(props: any) {
-  // 1. Register this specific section as a valid drop zone!
+export default function ContainerSection({
+  id,
+  bgColor = "#f8fafc",
+  paddingY = 40,
+  paddingX = 24,
+  minHeight = "150px",
+  direction = "column",
+  gap = 16,
+  borderRadius = "8px",
+  alignItems = "center",
+  justifyContent = "flex-start",
+  borderWidth = 0,
+  borderColor = "transparent",
+  shadow = false,
+  children: nestedBlocks = [],
+}: ContainerSectionProps) {
   const { isOver, setNodeRef } = useDroppable({
-    id: `container-${props.id}`,
+    id: `container-${id}`,
   });
 
-  const nestedBlocks = props.children || [];
   return (
     <section
       ref={setNodeRef}
       style={{
-        backgroundColor: props.bgColor || "#f8fafc",
-        padding: `${props.paddingY || 40}px ${props.paddingX || 24}px`,
-        minHeight: props.minHeight || "150px",
+        backgroundColor: bgColor,
+        padding: `${paddingY}px ${paddingX}px`,
+        minHeight,
         display: "flex",
-        flexDirection: props.direction || "column",
-        alignItems: props.alignItems || "center",
-        justifyContent: props.justifyContent || "flex-start",
-        gap: `${props.gap || 16}px`,
-        border: isOver ? "2px solid #22c55e" : "2px dashed #cbd5e1",
-        borderRadius: "8px",
+        flexDirection: direction as React.CSSProperties["flexDirection"],
+        alignItems,
+        justifyContent,
+        gap: `${gap}px`,
+        border: isOver ? "2px solid #22c55e" : `${borderWidth}px solid ${borderColor}`,
+        borderRadius: borderRadius,
+        boxShadow: shadow ? "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)" : "none",
         width: "100%",
         height: "100%",
         transition: "border 0.2s ease",
@@ -32,15 +50,13 @@ export default function ContainerSection(props: any) {
           Empty Section. Drop elements here.
         </p>
       ) : (
-        nestedBlocks.map((child: any) => {
+        nestedBlocks.map((child: EditorBlock) => {
           const ChildComponent = BlockRegistry[child.type];
           return ChildComponent ? (
             <div key={child.id} className="w-full relative z-10">
-              <ChildComponent
-                {...child.data}
-                id={child.id}
-                children={child.children}
-              />
+              <ChildComponent {...child.data} id={child.id}>
+                {child.children}
+              </ChildComponent>
             </div>
           ) : null;
         })

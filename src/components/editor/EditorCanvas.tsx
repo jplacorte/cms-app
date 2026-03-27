@@ -20,7 +20,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, TrashIcon } from "lucide-react";
 import { Resizable } from "re-resizable";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 function SortableBlock({ block }: { block: EditorBlock }) {
   const { activeBlockId, removeBlock, setActiveBlock, updateBlock } =
@@ -34,30 +34,21 @@ function SortableBlock({ block }: { block: EditorBlock }) {
     isDragging,
   } = useSortable({ id: block.id });
 
-  const isInline = block.type === "CustomButton";
   const isText = block.type === "TextBlock";
-  const defaultWidth = isInline ? "auto" : "100%";
-
-  const [size, setSize] = useState({
-    width: block.data.width || defaultWidth,
-    height: isText ? "auto" : block.data.height || "auto",
-  });
-
-  useEffect(() => {
-    setSize({
-      width: block.data.width || defaultWidth,
-      height: isText ? "auto" : block.data.height || "auto",
-    });
-  }, [block.data.width, block.data.height, defaultWidth, isText]);
-
   const isActive = activeBlockId === block.id;
 
+  // Local state for smooth real-time resizing preview
+  const [localSize, setLocalSize] = useState<{ width: string | number; height: string | number } | null>(null);
+
+  const currentWidth = localSize?.width ?? ((block.data.width as string | number) || (block.type === "CustomButton" ? "auto" : "100%"));
+  const currentHeight = isText ? "auto" : (localSize?.height ?? ((block.data.height as string | number) || "auto"));
+
+  // THE FIX: The outer wrapper handles position (dnd-kit) but NOT size
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : 1,
-    width: size.width,
-    height: isText ? "auto" : size.height,
+    width: "100%", // Let it span the container
   };
 
   const Component = BlockRegistry[block.type];
@@ -71,17 +62,11 @@ function SortableBlock({ block }: { block: EditorBlock }) {
         e.stopPropagation();
         setActiveBlock(block.id);
       }}
-      className={`group relative rounded select-none border-2 transition-colors ${
-        isDragging
-          ? "border-blue-500 z-50 shadow-2xl"
-          : isActive
-            ? "border-indigo-500 shadow-md"
-            : "border-transparent hover:border-slate-300"
-      }`}
+      className="group relative"
     >
-      {/* TOOLBAR: Moved to z-40 so handles (z-50) are always on top */}
+      {/* Floating Toolbar */}
       <div
-        className={`absolute -top-11 left-0 bg-indigo-600 text-white rounded-md shadow-lg flex items-center gap-1 p-1 z-40 transition-all ${
+        className={`absolute -top-11 left-0 bg-indigo-600 text-white rounded-md shadow-lg flex items-center gap-1 p-1 z-50 transition-all ${
           isActive || isDragging
             ? "opacity-100 visible"
             : "opacity-0 invisible group-hover:opacity-100 group-hover:visible"
@@ -90,7 +75,7 @@ function SortableBlock({ block }: { block: EditorBlock }) {
         <div
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing p-1.5 hover:bg-indigo-700 rounded"
+          className="cursor-grab p-1.5 hover:bg-indigo-700 rounded"
         >
           <GripVertical size={14} />
         </div>
@@ -105,81 +90,81 @@ function SortableBlock({ block }: { block: EditorBlock }) {
         </button>
       </div>
 
-      <div className="w-full h-full relative">
-        <Resizable
-          size={{ width: size.width, height: isText ? "auto" : size.height }}
-          minWidth={40} // Allows much more "free" movement than 150px
-          onResize={(e, direction, ref, d) => {
-            setSize({
-              width: ref.style.width,
-              height: isText ? "auto" : ref.style.height,
-            });
-          }}
-          onResizeStop={(e, direction, ref, d) => {
-            updateBlock(block.id, {
-              width: ref.style.width,
-              height: isText ? "auto" : ref.style.height,
-            });
-          }}
-          enable={{
-            right: isActive,
-            bottom: isActive && !isText,
-            bottomRight: isActive && !isText,
-          }}
-          handleStyles={{
-            // INCREASED HIT AREA (20px) + VISIBLE INDICATOR
-            right: {
-              width: "20px",
-              right: "-10px",
-              cursor: "col-resize",
-              zIndex: 50,
-              display: isActive ? "flex" : "none",
-              alignItems: "center",
-              justifyContent: "center",
-            },
-            bottom: {
-              height: "20px",
-              bottom: "-10px",
-              cursor: "row-resize",
-              zIndex: 50,
-              display: isActive && !isText ? "flex" : "none",
-              alignItems: "center",
-              justifyContent: "center",
-            },
-            bottomRight: {
-              width: "16px",
-              height: "16px",
-              right: "-8px",
-              bottom: "-8px",
-              zIndex: 51,
-              backgroundColor: "#6366f1",
-              borderRadius: "50%",
-              border: "2px solid white",
-              display: isActive && !isText ? "block" : "none",
-            },
-          }}
-          // ADD VISIBLE LINES FOR THE HANDLES
-          handleComponent={{
-            right: (
-              <div className="w-1 h-8 bg-indigo-400 rounded-full opacity-50 hover:opacity-100" />
-            ),
-            bottom: (
-              <div className="h-1 w-8 bg-indigo-400 rounded-full opacity-50 hover:opacity-100" />
-            ),
-          }}
+      <Resizable
+        size={{ width: currentWidth, height: currentHeight }}
+        minWidth={60}
+        onResize={(_, __, ref) => {
+          setLocalSize({
+            width: ref.style.width,
+            height: isText ? "auto" : ref.style.height,
+          });
+        }}
+        onResizeStop={(_, __, ref) => {
+          setLocalSize(null);
+          updateBlock(block.id, {
+            width: ref.style.width,
+            height: isText ? "auto" : ref.style.height,
+          });
+        }}
+        enable={{
+          right: isActive,
+          bottom: isActive && !isText,
+          bottomRight: isActive && !isText,
+        }}
+        handleStyles={{
+          right: {
+            width: "30px",
+            right: "-15px",
+            zIndex: 60,
+            display: isActive ? "flex" : "none",
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          bottom: {
+            height: "30px",
+            bottom: "-15px",
+            zIndex: 60,
+            display: isActive && !isText ? "flex" : "none",
+            justifyContent: "center",
+            alignItems: "center",
+          },
+          bottomRight: {
+            width: "20px",
+            height: "20px",
+            right: "-10px",
+            bottom: "-10px",
+            zIndex: 70,
+            backgroundColor: "#6366f1",
+            borderRadius: "50%",
+            border: "2px solid white",
+            display: isActive && !isText ? "block" : "none",
+          },
+        }}
+        handleComponent={{
+          right: (
+            <div className="w-1.5 h-10 bg-indigo-400 rounded-full opacity-40 group-hover:opacity-100" />
+          ),
+          bottom: (
+            <div className="h-1.5 w-10 bg-indigo-400 rounded-full opacity-40 group-hover:opacity-100" />
+          ),
+        }}
+      >
+        <div
+          className={`w-full h-full rounded border-2 transition-colors ${
+            isActive
+              ? "border-indigo-500 shadow-md bg-white/50"
+              : "border-transparent hover:border-slate-300"
+          }`}
         >
-          {/* THE ULTIMATE FIX: pointer-events-none on the inner wrapper kills all interference */}
           <div
             className={`w-full ${isText ? "h-auto" : "h-full"} pointer-events-none flex flex-col overflow-visible`}
           >
-            <Component
-              {...block.data}
-              id={block.id}
-              children={block.children}
-            />
+            <Component {...block.data} id={block.id}>
+              {block.children}
+            </Component>
           </div>
-        </Resizable>
-      </div>
+        </div>
+      </Resizable>
     </div>
   );
 }
