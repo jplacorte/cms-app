@@ -9,6 +9,7 @@ import GridContainer from "@/components/blocks/GridContainer";
 import HeroBlock from "@/components/blocks/HeroBlock";
 import ImageBlock from "@/components/blocks/ImageBlock";
 import NavbarBlock from "@/components/blocks/NavbarBlock";
+import SidebarNavBlock from "@/components/blocks/SidebarNavBlock";
 import PricingTableBlock from "@/components/blocks/PricingTableBlock";
 import SocialLinksBlock from "@/components/blocks/SocialLinksBlock";
 import SpacerBlock from "@/components/blocks/SpacerBlock";
@@ -40,6 +41,7 @@ export const BlockRegistry: Record<string, React.ElementType> = {
 
   // Navigation
   NavbarBlock: NavbarBlock,
+  SidebarNavBlock: SidebarNavBlock,
   FooterBlock: FooterBlock,
 
   // Forms & Social

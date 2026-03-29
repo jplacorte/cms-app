@@ -21,15 +21,7 @@ interface EditorState {
   addBlock: (type: string, initialData?: Record<string, unknown>, parentId?: string | null) => void;
   updateBlock: (id: string, newData: Record<string, unknown>) => void;
   removeBlock: (id: string) => void;
-  reorderBlocks: (
-    containerId: string | null,
-    oldIndex: number,
-    newIndex: number,
-  ) => void;
-  moveBlockBetweenContainers: (
-    activeId: string,
-    targetContainerId: string | null,
-  ) => void;
+  moveBlock: (activeId: string, overId: string | null) => void;
 }
 
 // Recursive Helpers
@@ -86,7 +78,12 @@ export const useEditorStore = create<EditorState>((set) => ({
   addBlock: (type, initialData = {}, parentId = null) =>
     set((state) => {
       const newBlock = { id: uuidv4(), type, data: initialData, children: [] };
-      if (!parentId) return { blocks: [...state.blocks, newBlock] };
+      if (!parentId) {
+        if (type === "NavbarBlock" || type === "SidebarNavBlock") {
+          return { blocks: [newBlock, ...state.blocks] };
+        }
+        return { blocks: [...state.blocks, newBlock] };
+      }
       return { blocks: addToTree(state.blocks, parentId, newBlock) };
     }),
 
@@ -99,66 +96,84 @@ export const useEditorStore = create<EditorState>((set) => ({
       activeBlockId: state.activeBlockId === id ? null : state.activeBlockId,
     })),
 
-  reorderBlocks: (containerId, oldIndex, newIndex) =>
+  moveBlock: (activeId, overId) =>
     set((state) => {
-      const newBlocks = JSON.parse(JSON.stringify(state.blocks));
-      const reorderInTree = (nodes: EditorBlock[]): boolean => {
-        if (!containerId) {
-          const [moved] = nodes.splice(oldIndex, 1);
-          nodes.splice(newIndex, 0, moved);
-          return true;
-        }
-        for (const node of nodes) {
-          if (node.id === containerId && node.children) {
-            const [moved] = node.children.splice(oldIndex, 1);
-            node.children.splice(newIndex, 0, moved);
-            return true;
-          }
-          if (node.children && reorderInTree(node.children)) return true;
-        }
-        return false;
-      };
-      reorderInTree(newBlocks);
-      return { blocks: newBlocks };
-    }),
+      if (activeId === overId) return state;
 
-  moveBlockBetweenContainers: (activeId, targetContainerId) =>
-    set((state) => {
       const newBlocks = JSON.parse(JSON.stringify(state.blocks));
-      let foundBlock: EditorBlock | null = null;
 
-      const removeNode = (nodes: EditorBlock[]): boolean => {
-        for (let i = 0; i < nodes.length; i++) {
-          if (nodes[i].id === activeId) {
-            foundBlock = nodes.splice(i, 1)[0];
-            return true;
+      let activeItem: EditorBlock | null = null;
+      let activeParentList: EditorBlock[] | null = null;
+      let activeIndex = -1;
+
+      let overItem: EditorBlock | null = null;
+      let overParentList: EditorBlock[] | null = null;
+      let overIndex = -1;
+
+      const findNodes = (list: EditorBlock[]) => {
+        for (let i = 0; i < list.length; i++) {
+          const node = list[i];
+          if (node.id === activeId) {
+            activeItem = node;
+            activeParentList = list;
+            activeIndex = i;
           }
-          const children = nodes[i].children;
-          if (children && removeNode(children)) return true;
+          if (node.id === overId) {
+            overItem = node;
+            overParentList = list;
+            overIndex = i;
+          }
+          if (node.children) {
+            findNodes(node.children);
+          }
         }
-        return false;
       };
 
-      removeNode(newBlocks);
-      if (!foundBlock) return state;
+      findNodes(newBlocks);
 
-      if (targetContainerId === null) {
-        newBlocks.push(foundBlock);
-      } else {
-        const addNode = (nodes: EditorBlock[]): boolean => {
-          for (let i = 0; i < nodes.length; i++) {
-            const node = nodes[i]; // FIX: Local variable allows type narrowing
-            if (node.id === targetContainerId) {
-              if (!node.children) node.children = [];
-              node.children.push(foundBlock!); // Now safe
-              return true;
-            }
-            if (node.children && addNode(node.children)) return true;
+      if (!activeItem || !activeParentList) return state;
+
+      // Handle dropping onto a container explicitly
+      if (overId !== null && typeof overId === "string" && overId.startsWith("container-")) {
+        const targetId = overId.replace("container-", "");
+        
+        if (targetId === "root" || !targetId) {
+          (activeParentList as EditorBlock[]).splice(activeIndex, 1);
+          newBlocks.push(activeItem);
+          return { blocks: newBlocks };
+        }
+
+        let targetContainer: EditorBlock | null = null;
+        const findTarget = (list: EditorBlock[]) => {
+          for (const node of list) {
+            if (node.id === targetId) { targetContainer = node; return; }
+            if (node.children) findTarget(node.children);
           }
-          return false;
         };
-        addNode(newBlocks);
+        findTarget(newBlocks);
+
+        if (targetContainer) {
+          (activeParentList as EditorBlock[]).splice(activeIndex, 1);
+          if (!(targetContainer as EditorBlock).children) (targetContainer as EditorBlock).children = [];
+          (targetContainer as EditorBlock).children!.push(activeItem);
+        }
+        return { blocks: newBlocks };
       }
-      return { blocks: newBlocks };
+
+      // Handle dropping before/after a specific item (same list or different list)
+      if (overItem && overParentList) {
+        if (activeParentList === overParentList) {
+          // Same list - standard array move
+          (activeParentList as EditorBlock[]).splice(activeIndex, 1);
+          (activeParentList as EditorBlock[]).splice(overIndex, 0, activeItem);
+        } else {
+          // Cross-container move
+          (activeParentList as EditorBlock[]).splice(activeIndex, 1);
+          (overParentList as EditorBlock[]).splice(overIndex, 0, activeItem);
+        }
+        return { blocks: newBlocks };
+      }
+
+      return state;
     }),
 }));

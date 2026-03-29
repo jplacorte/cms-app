@@ -14,9 +14,11 @@ export default function CardBlock({
   titleColor = "#0f172a",
   descriptionColor = "#64748b",
   linkColor = "#2563eb",
+  customClassName = "",
 }: CardBlockProps) {
   return (
     <div
+      className={customClassName}
       style={{
         backgroundColor: bgColor,
         borderRadius,

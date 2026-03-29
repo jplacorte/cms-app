@@ -20,6 +20,7 @@ import {
   Play,
   Share2,
   Type,
+  Sidebar as SidebarLeft,
 } from "lucide-react";
 
 type SidebarItem = {
@@ -201,6 +202,21 @@ const categories: SidebarCategory[] = [
           ],
           ctaText: "Get Started",
           ctaLink: "#",
+        },
+      },
+      {
+        label: "Sidebar Nav",
+        icon: <SidebarLeft size={18} className="text-slate-600" />,
+        type: "SidebarNavBlock",
+        isTopLevel: true,
+        defaultData: {
+          logoText: "YourBrand",
+          links: [
+            { label: "Dashboard", href: "#" },
+            { label: "Projects", href: "#" },
+            { label: "Team", href: "#" },
+            { label: "Settings", href: "#" },
+          ],
         },
       },
       {

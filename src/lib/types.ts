@@ -7,6 +7,7 @@ import { EditorBlock } from "@/store/useEditorStore";
 export interface NavLink {
   label: string;
   href: string;
+  sublinks?: NavLink[];
 }
 
 export interface AccordionItem {
@@ -53,10 +54,12 @@ export interface StatCardData {
 // --- Block Props ---
 
 export interface SpacerBlockProps {
+  customClassName?: string;
   height?: number;
 }
 
 export interface DividerBlockProps {
+  customClassName?: string;
   color?: string;
   thickness?: number;
   style?: string;
@@ -65,12 +68,14 @@ export interface DividerBlockProps {
 }
 
 export interface VideoBlockProps {
+  customClassName?: string;
   url?: string;
   aspectRatio?: string;
   borderRadius?: string;
 }
 
 export interface AccordionBlockProps {
+  customClassName?: string;
   items?: AccordionItem[];
   bgColor?: string;
   borderRadius?: string;
@@ -80,6 +85,7 @@ export interface AccordionBlockProps {
 }
 
 export interface TestimonialBlockProps {
+  customClassName?: string;
   quote?: string;
   name?: string;
   title?: string;
@@ -92,11 +98,13 @@ export interface TestimonialBlockProps {
 }
 
 export interface PricingTableBlockProps {
+  customClassName?: string;
   tiers?: PricingTier[];
   accentColor?: string;
 }
 
 export interface NavbarBlockProps {
+  customClassName?: string;
   logoText?: string;
   logoUrl?: string;
   links?: NavLink[];
@@ -104,6 +112,11 @@ export interface NavbarBlockProps {
   textColor?: string;
   linkColor?: string;
   borderColor?: string;
+  borderWidth?: number;
+  borderStyle?: string;
+  shadow?: boolean;
+  outlineColor?: string;
+  outlineStyle?: string;
   ctaText?: string;
   ctaLink?: string;
   ctaBgColor?: string;
@@ -111,6 +124,7 @@ export interface NavbarBlockProps {
 }
 
 export interface FooterBlockProps {
+  customClassName?: string;
   columns?: FooterColumn[];
   bgColor?: string;
   headingColor?: string;
@@ -121,6 +135,7 @@ export interface FooterBlockProps {
 }
 
 export interface ContactFormBlockProps {
+  customClassName?: string;
   heading?: string;
   subheading?: string;
   headingColor?: string;
@@ -134,6 +149,7 @@ export interface ContactFormBlockProps {
 }
 
 export interface CardBlockProps {
+  customClassName?: string;
   imageUrl?: string;
   imageHeight?: string;
   title?: string;
@@ -150,6 +166,7 @@ export interface CardBlockProps {
 }
 
 export interface SocialLinksBlockProps {
+  customClassName?: string;
   links?: SocialLink[];
   iconSize?: number;
   iconColor?: string;
@@ -160,6 +177,7 @@ export interface SocialLinksBlockProps {
 }
 
 export interface TextBlockProps {
+  customClassName?: string;
   content?: string;
   tag?: string;
   textColor?: string;
@@ -171,6 +189,7 @@ export interface TextBlockProps {
 }
 
 export interface ImageBlockProps {
+  customClassName?: string;
   src?: string;
   alt?: string;
   width?: number;
@@ -181,6 +200,7 @@ export interface ImageBlockProps {
 }
 
 export interface CustomButtonProps {
+  customClassName?: string;
   text?: string;
   href?: string;
   bgColor?: string;
@@ -195,6 +215,7 @@ export interface CustomButtonProps {
 }
 
 export interface ContainerSectionProps {
+  customClassName?: string;
   id: string;
   bgColor?: string;
   paddingY?: number;
@@ -212,6 +233,8 @@ export interface ContainerSectionProps {
 }
 
 export interface GridContainerProps {
+  customClassName?: string;
+  id?: string;
   columns?: number;
   gap?: number;
   paddingY?: number;

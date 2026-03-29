@@ -1,8 +1,9 @@
 import { db } from "@/db";
 import { pages } from "@/db/schema";
-import { BlockRegistry } from "@/lib/block-map";
 import { eq } from "drizzle-orm";
+import { EditorBlock } from "@/store/useEditorStore";
 import { notFound } from "next/navigation";
+import DynamicBlockWrapper from "@/components/editor/wrappers/DynamicBlockWrapper";
 
 // FIX 1: Prevent Next.js from caching 404s.
 // Because this is a CMS, we want the page to fetch fresh from the database every single time.
@@ -30,27 +31,14 @@ export default async function PublicPage({
   }
 
   // Parse the blocks
-  const blocks = pageData.blocks as any[];
+  const blocks = pageData.blocks as EditorBlock[];
 
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col items-center pt-10 pb-24">
-      <div className="w-full max-w-5xl">
-        {blocks.map((block) => {
-          const Component = BlockRegistry[block.type];
-
-          if (!Component) {
-            console.warn(
-              `Missing component in registry for type: ${block.type}`,
-            );
-            return null;
-          }
-
-          return (
-            <div key={block.id} className="mb-8 w-full">
-              <Component {...block.data} />
-            </div>
-          );
-        })}
+    <main className="min-h-screen bg-slate-50 flex flex-col items-center">
+      <div className="w-full max-w-5xl mx-auto p-12 overflow-y-auto space-y-4">
+        {blocks.map((block) => (
+          <DynamicBlockWrapper key={block.id} block={block} isEditor={false} />
+        ))}
       </div>
     </main>
   );

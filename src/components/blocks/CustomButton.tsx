@@ -12,10 +12,12 @@ export default function CustomButton({
   fontWeight = "600",
   borderWidth = 0,
   borderColor = "#000000",
+  customClassName = "",
 }: CustomButtonProps) {
   return (
     <a
       href={href}
+      className={customClassName}
       style={{
         backgroundColor: bgColor,
         color: textColor,

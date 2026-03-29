@@ -118,14 +118,32 @@ function ColorInput({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const isTransparent = value === "transparent";
+
   return (
     <div className="flex-1">
-      <FieldLabel>{label}</FieldLabel>
+      <div className="flex items-center justify-between mb-1">
+        <label className="block text-xs text-slate-500">{label}</label>
+        <button
+          onClick={() => onChange(isTransparent ? "#000000" : "transparent")}
+          className={`text-[10px] px-1.5 py-0.5 rounded transition-colors ${
+            isTransparent
+              ? "bg-blue-100 text-blue-700"
+              : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+          }`}
+          title="Toggle Transparent / None"
+        >
+          {isTransparent ? "Solid" : "None"}
+        </button>
+      </div>
       <input
         type="color"
-        value={value}
+        value={isTransparent ? "#ffffff" : value}
+        disabled={isTransparent}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full h-8 cursor-pointer rounded border border-slate-200 p-0.5"
+        className={`w-full h-8 rounded border border-slate-200 p-0.5 transition-opacity ${
+          isTransparent ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+        }`}
       />
     </div>
   );
@@ -176,7 +194,7 @@ export default function PropertiesPanel() {
 
   if (!activeBlock) {
     return (
-      <div className="w-80 bg-slate-50 border-l border-slate-200 p-6 flex flex-col items-center justify-center text-center text-slate-400 z-10">
+      <div className="w-96 bg-slate-50 border-l border-slate-200 p-6 flex flex-col items-center justify-center text-center text-slate-400 z-10 shrink-0">
         <p className="text-sm">
           Select a block on the canvas to edit its properties.
         </p>
@@ -191,7 +209,7 @@ export default function PropertiesPanel() {
   };
 
   return (
-    <div className="w-80 bg-white border-l border-slate-200 flex flex-col h-full shadow-[-4px_0_24px_rgba(0,0,0,0.02)] z-10 overflow-y-auto">
+    <div className="w-96 bg-white border-l border-slate-200 flex flex-col h-full shadow-[-4px_0_24px_rgba(0,0,0,0.02)] z-10 overflow-y-auto shrink-0">
       <div className="flex justify-between items-center p-4 border-b border-slate-100 sticky top-0 bg-white z-20">
         <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
           Edit {activeBlock.type}
@@ -666,6 +684,112 @@ export default function PropertiesPanel() {
             <ColorInput label="Link Color" value={data.linkColor || "#475569"} onChange={(v) => handleChange("linkColor", v)} />
             <SectionHeading>Navigation Links</SectionHeading>
             {(data.links as NavLink[] || []).map((link: NavLink, index: number) => (
+              <div key={index} className="space-y-2 border border-slate-200 p-3 rounded-lg bg-slate-50">
+                <div className="flex gap-2 items-center">
+                  <input type="text" value={link.label} onChange={(e) => {
+                    const l = [...(data.links as NavLink[] || [])]; l[index] = { ...l[index], label: e.target.value }; handleChange("links", l);
+                  }} className="flex-[0.8] min-w-0 text-sm border border-slate-300 rounded p-2" placeholder="Label" />
+                  <input type="text" value={link.href} onChange={(e) => {
+                    const l = [...(data.links as NavLink[] || [])]; l[index] = { ...l[index], href: e.target.value }; handleChange("links", l);
+                  }} className="flex-1 min-w-0 text-sm border border-slate-300 rounded p-2" placeholder="/path" />
+                  <button onClick={() => {
+                    const l = [...(data.links as NavLink[] || [])]; l.splice(index, 1); handleChange("links", l);
+                  }} className="text-red-400 hover:text-red-600 text-sm">×</button>
+                </div>
+                {/* SUBLINKS */}
+                <div className="pl-4 space-y-2 border-l-2 border-slate-200">
+                  <div className="text-xs font-medium text-slate-500">Dropdown Links</div>
+                  {(link.sublinks || []).map((sublink, subIndex) => (
+                    <div key={subIndex} className="flex gap-2 items-center">
+                      <input type="text" value={sublink.label} onChange={(e) => {
+                        const l = [...(data.links as NavLink[] || [])]; 
+                        l[index].sublinks = [...(l[index].sublinks || [])];
+                        l[index].sublinks![subIndex] = { ...l[index].sublinks![subIndex], label: e.target.value };
+                        handleChange("links", l);
+                      }} className="flex-[0.8] min-w-0 text-xs border border-slate-200 rounded p-1.5" placeholder="Sub-label" />
+                      <input type="text" value={sublink.href} onChange={(e) => {
+                        const l = [...(data.links as NavLink[] || [])]; 
+                        l[index].sublinks = [...(l[index].sublinks || [])];
+                        l[index].sublinks![subIndex] = { ...l[index].sublinks![subIndex], href: e.target.value };
+                        handleChange("links", l);
+                      }} className="flex-1 min-w-0 text-xs border border-slate-200 rounded p-1.5" placeholder="/sub-path" />
+                      <button onClick={() => {
+                        const l = [...(data.links as NavLink[] || [])]; 
+                        l[index].sublinks = [...(l[index].sublinks || [])];
+                        l[index].sublinks!.splice(subIndex, 1);
+                        handleChange("links", l);
+                      }} className="text-red-400 hover:text-red-600 text-sm">×</button>
+                    </div>
+                  ))}
+                  <button onClick={() => {
+                    const l = [...(data.links as NavLink[] || [])];
+                    l[index].sublinks = [...(l[index].sublinks || []), { label: "New Sublink", href: "#" }];
+                    handleChange("links", l);
+                  }} className="text-xs text-blue-600 font-medium">
+                    + Add Dropdown Link
+                  </button>
+                </div>
+              </div>
+            ))}
+            <button onClick={() => {
+              handleChange("links", [...(data.links as NavLink[] || []), { label: "New Link", href: "#" }]);
+            }} className="w-full py-2 text-sm text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              + Add Root Link
+            </button>
+            <SectionHeading>Styles & Layout</SectionHeading>
+            <Row>
+              <SelectInput label="Border Style" value={data.borderStyle || "solid"} onChange={(v) => handleChange("borderStyle", v)} options={[
+                { value: "none", label: "None" },
+                { value: "solid", label: "Solid" },
+                { value: "dashed", label: "Dashed" },
+              ]} />
+              <NumberInput label="Border Width" value={data.borderWidth as number ?? 1} onChange={(v) => handleChange("borderWidth", v)} />
+            </Row>
+            <Row>
+              <ColorInput label="Border Color" value={data.borderColor || "#e2e8f0"} onChange={(v) => handleChange("borderColor", v)} />
+              <SelectInput label="Shadow" value={data.shadow ? "true" : "false"} onChange={(v) => handleChange("shadow", v === "true")} options={[
+                { value: "false", label: "None" },
+                { value: "true", label: "Soft Shadow" },
+              ]} />
+            </Row>
+            <Row>
+              <SelectInput label="Outline Style" value={data.outlineStyle || "none"} onChange={(v) => handleChange("outlineStyle", v)} options={[
+                { value: "none", label: "None" },
+                { value: "solid", label: "Solid" },
+                { value: "dashed", label: "Dashed" },
+              ]} />
+              <ColorInput label="Outline Color" value={data.outlineColor || "#3b82f6"} onChange={(v) => handleChange("outlineColor", v)} />
+            </Row>
+            <SectionHeading>CTA Button</SectionHeading>
+            <TextInput label="CTA Text" value={data.ctaText || ""} onChange={(v) => handleChange("ctaText", v)} />
+            <TextInput label="CTA Link" value={data.ctaLink || ""} onChange={(v) => handleChange("ctaLink", v)} />
+            <Row>
+              <ColorInput label="CTA BG" value={data.ctaBgColor || "#2563eb"} onChange={(v) => handleChange("ctaBgColor", v)} />
+              <ColorInput label="CTA Text" value={data.ctaTextColor || "#ffffff"} onChange={(v) => handleChange("ctaTextColor", v)} />
+            </Row>
+          </div>
+        )}
+
+        {/* SIDEBAR NAV BLOCK */}
+        {activeBlock.type === "SidebarNavBlock" && (
+          <div className="space-y-4">
+            <SectionHeading>Sidebar Navigation</SectionHeading>
+            <TextInput label="Logo Text" value={data.logoText || ""} onChange={(v) => handleChange("logoText", v)} />
+            <TextInput label="Logo Image URL" value={data.logoUrl || ""} onChange={(v) => handleChange("logoUrl", v)} placeholder="https://..." />
+            <Row>
+              <ColorInput label="Background" value={data.bgColor || "#ffffff"} onChange={(v) => handleChange("bgColor", v)} />
+              <ColorInput label="Border Color" value={data.borderColor || "#e2e8f0"} onChange={(v) => handleChange("borderColor", v)} />
+            </Row>
+            <Row>
+              <ColorInput label="Text" value={data.textColor || "#0f172a"} onChange={(v) => handleChange("textColor", v)} />
+              <ColorInput label="Link Color" value={data.linkColor || "#475569"} onChange={(v) => handleChange("linkColor", v)} />
+            </Row>
+            <Row>
+              <NumberInput label="Padding X" value={data.paddingX || 24} onChange={(v) => handleChange("paddingX", v)} />
+              <NumberInput label="Padding Y" value={data.paddingY || 32} onChange={(v) => handleChange("paddingY", v)} />
+            </Row>
+            <SectionHeading>Navigation Links</SectionHeading>
+            {(data.links as NavLink[] || []).map((link: NavLink, index: number) => (
               <div key={index} className="flex gap-2 items-center">
                 <input type="text" value={link.label} onChange={(e) => {
                   const l = [...(data.links as NavLink[] || [])]; l[index] = { ...l[index], label: e.target.value }; handleChange("links", l);
@@ -799,20 +923,18 @@ export default function PropertiesPanel() {
             <TextArea label="Description" value={data.description || ""} onChange={(v) => handleChange("description", v)} />
             <Row>
               <TextInput label="Link Text" value={data.linkText || ""} onChange={(v) => handleChange("linkText", v)} />
-              <TextInput label="Link URL" value={data.linkUrl || ""} onChange={(v) => handleChange("linkUrl", v)} />
+              <TextInput label="Link URL" value={data.linkUrl || ""} onChange={(v) => handleChange("linkUrl", v)} placeholder="https://..." />
             </Row>
             <SectionHeading>Styles</SectionHeading>
             <Row>
               <ColorInput label="Background" value={data.bgColor || "#ffffff"} onChange={(v) => handleChange("bgColor", v)} />
-              <ColorInput label="Border" value={data.borderColor || "#e2e8f0"} onChange={(v) => handleChange("borderColor", v)} />
+              <ColorInput label="Text" value={data.textColor || "#0f172a"} onChange={(v) => handleChange("textColor", v)} />
             </Row>
-            <Row>
-              <TextInput label="Radius" value={data.borderRadius || "16px"} onChange={(v) => handleChange("borderRadius", v)} />
-              <SelectInput label="Shadow" value={data.shadow ? "true" : "false"} onChange={(v) => handleChange("shadow", v === "true")} options={[
-                { value: "false", label: "None" },
-                { value: "true", label: "Soft Shadow" },
-              ]} />
-            </Row>
+            <TextInput label="Border Radius" value={data.borderRadius || "12px"} onChange={(v) => handleChange("borderRadius", v)} />
+            <SelectInput label="Shadow" value={data.shadow ? "true" : "false"} onChange={(v) => handleChange("shadow", v === "true")} options={[
+              { value: "false", label: "None" },
+              { value: "true", label: "Soft Shadow" },
+            ]} />
           </div>
         )}
 
@@ -860,6 +982,23 @@ export default function PropertiesPanel() {
             </button>
           </div>
         )}
+
+        {/* GLOBAL ADVANCED SETTINGS */}
+        <div className="space-y-4 pt-4 border-t border-slate-200 mt-6">
+          <SectionHeading>Advanced Settings</SectionHeading>
+          <TextInput 
+            label="Font Family" 
+            value={data.fontFamily as string || ""} 
+            onChange={(v) => handleChange("fontFamily", v)} 
+            placeholder="e.g. Inter, Roboto, sans-serif" 
+          />
+          <TextInput 
+            label="Custom Tailwind Classes" 
+            value={data.className || ""} 
+            onChange={(v) => handleChange("className", v)} 
+            placeholder="e.g. hidden md:flex shadow-xl" 
+          />
+        </div>
       </div>
     </div>
   );
