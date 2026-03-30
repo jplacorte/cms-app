@@ -1,11 +1,13 @@
-import { ColorInput } from "@/lib/ui/ColorInput";
-import { NumberInput } from "@/lib/ui/NumberInput";
-import { Row } from "@/lib/ui/Row";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
-import { SelectInput } from "@/lib/ui/SelectInput";
-import { TextArea } from "@/lib/ui/TextArea";
-import { TextInput } from "@/lib/ui/TextInput";
-import { ImageUploadInput } from "@/lib/ui/ImageUploadInput";
+import {
+  ColorInput,
+  ImageUploadInput,
+  NumberInput,
+  Row,
+  SectionHeading,
+  SelectInput,
+  TextArea,
+  TextInput,
+} from "@/lib/ui";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -13,10 +15,7 @@ interface Props {
   handleChange: (key: string, value: unknown) => void;
 }
 
-export default function CardBlock({
-  data,
-  handleChange,
-}: Props) {
+export default function CardBlock({ data, handleChange }: Props) {
   return (
     <div className="space-y-4">
       <SectionHeading>Card</SectionHeading>

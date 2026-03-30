@@ -1,29 +1,31 @@
 "use client";
 
-import { EditorBlock, useEditorStore } from "@/store/useEditorStore";
 import { SectionHeading } from "@/lib/ui/SectionHeading";
 import { TextInput } from "@/lib/ui/TextInput";
+import { EditorBlock, useEditorStore } from "@/store/useEditorStore";
 
 // Property Components
-import NavbarBlock from "./Properties/NavbarBlock";
-import HeroSection from "./Properties/HeroSection";
-import CustomButton from "./Properties/CustomButton";
-import TextBlock from "./Properties/TextBlock";
-import ImageBlock from "./Properties/ImageBlock";
-import GridContainer from "./Properties/GridContainer";
-import ContainerSection from "./Properties/ContainerSection";
-import MetricsGrid from "./Properties/MetricsGrid";
-import SpacerBlock from "./Properties/SpacerBlock";
-import DividerBlock from "./Properties/DividerBlock";
-import VideoBlock from "./Properties/VideoBlock";
-import AccordionBlock from "./Properties/AccordionBlock";
-import TestimonialBlock from "./Properties/TestimonialBlock";
-import PricingTableBlock from "./Properties/PricingTableBlock";
-import SidebarNavBlock from "./Properties/SidebarNavBlock";
-import FooterBlock from "./Properties/FooterBlock";
-import ContactFormBlock from "./Properties/ContactFormBlock";
-import CardBlock from "./Properties/CardBlock";
-import SocialLinksBlock from "./Properties/SocialLinksBlock";
+import {
+  AccordionBlock,
+  CardBlock,
+  ContactFormBlock,
+  ContainerSection,
+  CustomButton,
+  DividerBlock,
+  FooterBlock,
+  GridContainer,
+  HeroSection,
+  ImageBlock,
+  MetricsGrid,
+  NavbarBlock,
+  PricingTableBlock,
+  SidebarNavBlock,
+  SocialLinksBlock,
+  SpacerBlock,
+  TestimonialBlock,
+  TextBlock,
+  VideoBlock,
+} from "@/components/Editor/Properties";
 
 const findBlockInTree = (
   blocks: EditorBlock[],
@@ -72,7 +74,7 @@ export default function PropertiesPanel() {
     { value: "800", label: "Extra Bold" },
     { value: "900", label: "Black" },
   ];
-  
+
   const transformOptions = [
     { value: "none", label: "Normal" },
     { value: "uppercase", label: "UPPERCASE" },
@@ -89,23 +91,29 @@ export default function PropertiesPanel() {
 
   const renderProperties = () => {
     const props = { data, handleChange };
-    
+
     switch (activeBlock.type) {
       case "NavbarBlock":
         return <NavbarBlock {...props} weightOptions={weightOptions} />;
       case "HeroSection":
         return (
-          <HeroSection 
-            {...props} 
-            weightOptions={weightOptions} 
-            transformOptions={transformOptions} 
-            textAlignOptions={textAlignOptions} 
+          <HeroSection
+            {...props}
+            weightOptions={weightOptions}
+            transformOptions={transformOptions}
+            textAlignOptions={textAlignOptions}
           />
         );
       case "CustomButton":
         return <CustomButton {...props} weightOptions={weightOptions} />;
       case "TextBlock":
-        return <TextBlock {...props} weightOptions={weightOptions} textAlignOptions={textAlignOptions} />;
+        return (
+          <TextBlock
+            {...props}
+            weightOptions={weightOptions}
+            textAlignOptions={textAlignOptions}
+          />
+        );
       case "ImageBlock":
         return <ImageBlock {...props} />;
       case "GridContainer":
@@ -135,7 +143,9 @@ export default function PropertiesPanel() {
       case "CardBlock":
         return <CardBlock {...props} />;
       case "SocialLinksBlock":
-        return <SocialLinksBlock {...props} textAlignOptions={textAlignOptions} />;
+        return (
+          <SocialLinksBlock {...props} textAlignOptions={textAlignOptions} />
+        );
       default:
         return (
           <div className="p-4 text-sm text-slate-500 italic">
@@ -165,17 +175,17 @@ export default function PropertiesPanel() {
         {/* GLOBAL ADVANCED SETTINGS */}
         <div className="space-y-4 pt-4 border-t border-slate-200 mt-6">
           <SectionHeading>Advanced Settings</SectionHeading>
-          <TextInput 
-            label="Font Family" 
-            value={data.fontFamily as string || ""} 
-            onChange={(v) => handleChange("fontFamily", v)} 
-            placeholder="e.g. Inter, Roboto, sans-serif" 
+          <TextInput
+            label="Font Family"
+            value={(data.fontFamily as string) || ""}
+            onChange={(v) => handleChange("fontFamily", v)}
+            placeholder="e.g. Inter, Roboto, sans-serif"
           />
-          <TextInput 
-            label="Custom Tailwind Classes" 
-            value={data.className || ""} 
-            onChange={(v) => handleChange("className", v)} 
-            placeholder="e.g. hidden md:flex shadow-xl" 
+          <TextInput
+            label="Custom Tailwind Classes"
+            value={data.className || ""}
+            onChange={(v) => handleChange("className", v)}
+            placeholder="e.g. hidden md:flex shadow-xl"
           />
         </div>
       </div>

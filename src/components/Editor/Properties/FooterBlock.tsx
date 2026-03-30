@@ -1,8 +1,5 @@
-import { ColorInput } from "@/lib/ui/ColorInput";
-import { Row } from "@/lib/ui/Row";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
-import { TextInput } from "@/lib/ui/TextInput";
 import { FooterColumn, NavLink } from "@/lib/types";
+import { ColorInput, Row, SectionHeading, TextInput } from "@/lib/ui";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -10,11 +7,8 @@ interface Props {
   handleChange: (key: string, value: unknown) => void;
 }
 
-export default function FooterBlock({
-  data,
-  handleChange,
-}: Props) {
-  const columns = (data.columns as FooterColumn[] || []);
+export default function FooterBlock({ data, handleChange }: Props) {
+  const columns = (data.columns as FooterColumn[]) || [];
 
   const updateColumnHeading = (ci: number, heading: string) => {
     const newColumns = [...columns];
@@ -36,7 +30,12 @@ export default function FooterBlock({
     handleChange("columns", [...columns, newColumn]);
   };
 
-  const updateLink = (ci: number, li: number, field: keyof NavLink, value: string) => {
+  const updateLink = (
+    ci: number,
+    li: number,
+    field: keyof NavLink,
+    value: string,
+  ) => {
     const newColumns = [...columns];
     const newLinks = [...newColumns[ci].links];
     newLinks[li] = { ...newLinks[li], [field]: value };
@@ -54,7 +53,10 @@ export default function FooterBlock({
 
   const addLink = (ci: number) => {
     const newColumns = [...columns];
-    const newLinks = [...newColumns[ci].links, { label: "New Link", href: "#" }];
+    const newLinks = [
+      ...newColumns[ci].links,
+      { label: "New Link", href: "#" },
+    ];
     newColumns[ci] = { ...newColumns[ci], links: newLinks };
     handleChange("columns", newColumns);
   };
@@ -94,7 +96,10 @@ export default function FooterBlock({
       />
       <SectionHeading>Columns</SectionHeading>
       {columns.map((col, ci) => (
-        <div key={ci} className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+        <div
+          key={ci}
+          className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100"
+        >
           <div className="flex justify-between items-center">
             <input
               type="text"
@@ -125,12 +130,18 @@ export default function FooterBlock({
                 className="flex-1 text-xs text-black border border-slate-200 rounded p-1.5"
                 placeholder="/path"
               />
-              <button onClick={() => removeLink(ci, li)} className="text-red-400 text-xs">
+              <button
+                onClick={() => removeLink(ci, li)}
+                className="text-red-400 text-xs"
+              >
                 ×
               </button>
             </div>
           ))}
-          <button onClick={() => addLink(ci)} className="text-xs text-blue-500 hover:underline">
+          <button
+            onClick={() => addLink(ci)}
+            className="text-xs text-blue-500 hover:underline"
+          >
             + Add link
           </button>
         </div>

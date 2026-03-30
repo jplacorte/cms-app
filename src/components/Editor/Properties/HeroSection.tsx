@@ -1,12 +1,14 @@
-import { ColorInput } from "@/lib/ui/ColorInput";
-import { NumberInput } from "@/lib/ui/NumberInput";
-import { RichTextInput } from "@/lib/ui/RichTextInput";
-import { Row } from "@/lib/ui/Row";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
-import { SelectInput } from "@/lib/ui/SelectInput";
-import { TextInput } from "@/lib/ui/TextInput";
-import { CheckboxInput } from "@/lib/ui/CheckboxInput";
-import { ImageUploadInput } from "@/lib/ui/ImageUploadInput";
+import {
+  CheckboxInput,
+  ColorInput,
+  ImageUploadInput,
+  NumberInput,
+  RichTextInput,
+  Row,
+  SectionHeading,
+  SelectInput,
+  TextInput,
+} from "@/lib/ui";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

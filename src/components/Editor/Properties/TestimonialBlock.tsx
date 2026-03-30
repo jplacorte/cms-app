@@ -1,9 +1,11 @@
-import { ColorInput } from "@/lib/ui/ColorInput";
-import { ImageUploadInput } from "@/lib/ui/ImageUploadInput";
-import { Row } from "@/lib/ui/Row";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
-import { TextArea } from "@/lib/ui/TextArea";
-import { TextInput } from "@/lib/ui/TextInput";
+import {
+  ColorInput,
+  ImageUploadInput,
+  Row,
+  SectionHeading,
+  TextArea,
+  TextInput,
+} from "@/lib/ui";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -11,10 +13,7 @@ interface Props {
   handleChange: (key: string, value: unknown) => void;
 }
 
-export default function TestimonialBlock({
-  data,
-  handleChange,
-}: Props) {
+export default function TestimonialBlock({ data, handleChange }: Props) {
   return (
     <div className="space-y-4">
       <SectionHeading>Testimonial</SectionHeading>

@@ -1,7 +1,5 @@
-import { ColorInput } from "@/lib/ui/ColorInput";
-import { Row } from "@/lib/ui/Row";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
 import { AccordionItem } from "@/lib/types";
+import { ColorInput, Row, SectionHeading } from "@/lib/ui";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,13 +7,14 @@ interface Props {
   handleChange: (key: string, value: unknown) => void;
 }
 
-export default function AccordionBlock({
-  data,
-  handleChange,
-}: Props) {
-  const items = (data.items as AccordionItem[] || []);
+export default function AccordionBlock({ data, handleChange }: Props) {
+  const items = (data.items as AccordionItem[]) || [];
 
-  const updateItem = (index: number, field: keyof AccordionItem, value: string) => {
+  const updateItem = (
+    index: number,
+    field: keyof AccordionItem,
+    value: string,
+  ) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     handleChange("items", newItems);
@@ -39,9 +38,14 @@ export default function AccordionBlock({
     <div className="space-y-4">
       <SectionHeading>Accordion / FAQ</SectionHeading>
       {items.map((item, index) => (
-        <div key={index} className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+        <div
+          key={index}
+          className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100"
+        >
           <div className="flex justify-between items-center">
-            <span className="text-xs font-semibold text-slate-500">Item {index + 1}</span>
+            <span className="text-xs font-semibold text-slate-500">
+              Item {index + 1}
+            </span>
             <button
               onClick={() => removeItem(index)}
               className="text-xs text-red-400 hover:text-red-600"

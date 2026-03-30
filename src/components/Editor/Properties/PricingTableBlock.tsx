@@ -1,6 +1,5 @@
-import { ColorInput } from "@/lib/ui/ColorInput";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
 import { PricingTier } from "@/lib/types";
+import { ColorInput, SectionHeading } from "@/lib/ui";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,11 +7,8 @@ interface Props {
   handleChange: (key: string, value: unknown) => void;
 }
 
-export default function PricingTableBlock({
-  data,
-  handleChange,
-}: Props) {
-  const tiers = (data.tiers as PricingTier[] || []);
+export default function PricingTableBlock({ data, handleChange }: Props) {
+  const tiers = (data.tiers as PricingTier[]) || [];
 
   const updateTier = (index: number, field: keyof PricingTier, value: any) => {
     const newTiers = [...tiers];
@@ -48,9 +44,14 @@ export default function PricingTableBlock({
         onChange={(v) => handleChange("accentColor", v)}
       />
       {tiers.map((tier, index) => (
-        <div key={index} className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+        <div
+          key={index}
+          className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100"
+        >
           <div className="flex justify-between items-center">
-            <span className="text-xs font-semibold text-slate-500">Tier {index + 1}</span>
+            <span className="text-xs font-semibold text-slate-500">
+              Tier {index + 1}
+            </span>
             <button
               onClick={() => removeTier(index)}
               className="text-xs text-red-400 hover:text-red-600"
@@ -83,7 +84,9 @@ export default function PricingTableBlock({
           </div>
           <textarea
             value={(tier.features || []).join("\n")}
-            onChange={(e) => updateTier(index, "features", e.target.value.split("\n"))}
+            onChange={(e) =>
+              updateTier(index, "features", e.target.value.split("\n"))
+            }
             className="w-full text-sm text-black border border-slate-200 rounded p-2"
             rows={3}
             placeholder="One feature per line"
@@ -100,7 +103,9 @@ export default function PricingTableBlock({
               <input
                 type="checkbox"
                 checked={tier.highlighted || false}
-                onChange={(e) => updateTier(index, "highlighted", e.target.checked)}
+                onChange={(e) =>
+                  updateTier(index, "highlighted", e.target.checked)
+                }
               />
               Featured
             </label>

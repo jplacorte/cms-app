@@ -1,8 +1,5 @@
-import { ColorInput } from "@/lib/ui/ColorInput";
-import { Row } from "@/lib/ui/Row";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
-import { TextInput } from "@/lib/ui/TextInput";
 import { FormField } from "@/lib/types";
+import { ColorInput, Row, SectionHeading, TextInput } from "@/lib/ui";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -10,13 +7,14 @@ interface Props {
   handleChange: (key: string, value: unknown) => void;
 }
 
-export default function ContactFormBlock({
-  data,
-  handleChange,
-}: Props) {
-  const fields = (data.fields as FormField[] || []);
+export default function ContactFormBlock({ data, handleChange }: Props) {
+  const fields = (data.fields as FormField[]) || [];
 
-  const updateField = (index: number, field: keyof FormField, value: string) => {
+  const updateField = (
+    index: number,
+    field: keyof FormField,
+    value: string,
+  ) => {
     const newFields = [...fields];
     newFields[index] = { ...newFields[index], [field]: value };
     handleChange("fields", newFields);
@@ -69,9 +67,14 @@ export default function ContactFormBlock({
       </Row>
       <SectionHeading>Form Fields</SectionHeading>
       {fields.map((field, index) => (
-        <div key={index} className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+        <div
+          key={index}
+          className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100"
+        >
           <div className="flex justify-between items-center">
-            <span className="text-xs font-semibold text-slate-500">Field {index + 1}</span>
+            <span className="text-xs font-semibold text-slate-500">
+              Field {index + 1}
+            </span>
             <button
               onClick={() => removeField(index)}
               className="text-xs text-red-400 hover:text-red-600"
@@ -100,7 +103,9 @@ export default function ContactFormBlock({
             <input
               type="text"
               value={field.placeholder}
-              onChange={(e) => updateField(index, "placeholder", e.target.value)}
+              onChange={(e) =>
+                updateField(index, "placeholder", e.target.value)
+              }
               className="flex-1 text-sm text-black border border-slate-200 rounded p-2"
               placeholder="Placeholder"
             />

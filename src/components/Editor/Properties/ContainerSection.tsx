@@ -1,9 +1,11 @@
-import { ColorInput } from "@/lib/ui/ColorInput";
-import { NumberInput } from "@/lib/ui/NumberInput";
-import { Row } from "@/lib/ui/Row";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
-import { SelectInput } from "@/lib/ui/SelectInput";
-import { TextInput } from "@/lib/ui/TextInput";
+import {
+  ColorInput,
+  NumberInput,
+  Row,
+  SectionHeading,
+  SelectInput,
+  TextInput,
+} from "@/lib/ui";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -11,10 +13,7 @@ interface Props {
   handleChange: (key: string, value: unknown) => void;
 }
 
-export default function ContainerSection({
-  data,
-  handleChange,
-}: Props) {
+export default function ContainerSection({ data, handleChange }: Props) {
   return (
     <div className="space-y-4">
       <SectionHeading>Section Settings</SectionHeading>
@@ -24,11 +23,23 @@ export default function ContainerSection({
         onChange={(v) => handleChange("bgColor", v)}
       />
       <Row>
-        <NumberInput label="Padding X" value={data.paddingX || 24} onChange={(v) => handleChange("paddingX", v)} />
-        <NumberInput label="Padding Y" value={data.paddingY || 40} onChange={(v) => handleChange("paddingY", v)} />
+        <NumberInput
+          label="Padding X"
+          value={data.paddingX || 24}
+          onChange={(v) => handleChange("paddingX", v)}
+        />
+        <NumberInput
+          label="Padding Y"
+          value={data.paddingY || 40}
+          onChange={(v) => handleChange("paddingY", v)}
+        />
       </Row>
       <Row>
-        <NumberInput label="Gap (px)" value={data.gap || 16} onChange={(v) => handleChange("gap", v)} />
+        <NumberInput
+          label="Gap (px)"
+          value={data.gap || 16}
+          onChange={(v) => handleChange("gap", v)}
+        />
         <NumberInput
           label="Min Height"
           value={parseInt(data.minHeight) || 150}

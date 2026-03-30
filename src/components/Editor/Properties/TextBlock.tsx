@@ -1,9 +1,11 @@
-import { ColorInput } from "@/lib/ui/ColorInput";
-import { NumberInput } from "@/lib/ui/NumberInput";
-import { Row } from "@/lib/ui/Row";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
-import { SelectInput } from "@/lib/ui/SelectInput";
-import { TextArea } from "@/lib/ui/TextArea";
+import {
+  ColorInput,
+  NumberInput,
+  Row,
+  SectionHeading,
+  SelectInput,
+  TextArea,
+} from "@/lib/ui";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

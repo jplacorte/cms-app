@@ -1,9 +1,11 @@
-import { ColorInput } from "@/lib/ui/ColorInput";
-import { NumberInput } from "@/lib/ui/NumberInput";
-import { Row } from "@/lib/ui/Row";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
-import { SelectInput } from "@/lib/ui/SelectInput";
 import { SocialLink } from "@/lib/types";
+import {
+  ColorInput,
+  NumberInput,
+  Row,
+  SectionHeading,
+  SelectInput,
+} from "@/lib/ui";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,9 +19,13 @@ export default function SocialLinksBlock({
   handleChange,
   textAlignOptions,
 }: Props) {
-  const links = (data.links as SocialLink[] || []);
+  const links = (data.links as SocialLink[]) || [];
 
-  const updateLink = (index: number, field: keyof SocialLink, value: string) => {
+  const updateLink = (
+    index: number,
+    field: keyof SocialLink,
+    value: string,
+  ) => {
     const newLinks = [...links];
     newLinks[index] = { ...newLinks[index], [field]: value };
     handleChange("links", newLinks);
@@ -63,7 +69,11 @@ export default function SocialLinksBlock({
           onChange={(v) => handleChange("alignment", v)}
           options={textAlignOptions}
         />
-        <NumberInput label="Gap (px)" value={data.gap || 16} onChange={(v) => handleChange("gap", v)} />
+        <NumberInput
+          label="Gap (px)"
+          value={data.gap || 16}
+          onChange={(v) => handleChange("gap", v)}
+        />
       </Row>
       <SectionHeading>Links</SectionHeading>
       {links.map((link, index) => (

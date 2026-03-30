@@ -2,6 +2,10 @@
   "name": "cms-app",
   "version": "0.1.0",
   "private": true,
+  "author": {
+    "name": "John Phillip Lacorte",
+    "email": "jaypeelacorte28@gmail.com"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

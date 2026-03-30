@@ -1,9 +1,12 @@
-import { ColorInput } from "@/lib/ui/ColorInput";
-import { ImageUploadInput } from "@/lib/ui/ImageUploadInput";
-import { NumberInput } from "@/lib/ui/NumberInput";
-import { Row } from "@/lib/ui/Row";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
-import { TextInput } from "@/lib/ui/TextInput";
+import {
+  ColorInput,
+  ImageUploadInput,
+  NumberInput,
+  Row,
+  SectionHeading,
+  TextInput,
+} from "@/lib/ui";
+
 import { NavLink } from "@/lib/types";
 
 interface Props {
@@ -12,11 +15,8 @@ interface Props {
   handleChange: (key: string, value: unknown) => void;
 }
 
-export default function SidebarNavBlock({
-  data,
-  handleChange,
-}: Props) {
-  const links = (data.links as NavLink[] || []);
+export default function SidebarNavBlock({ data, handleChange }: Props) {
+  const links = (data.links as NavLink[]) || [];
 
   const updateLink = (index: number, field: keyof NavLink, value: string) => {
     const newLinks = [...links];
@@ -84,8 +84,16 @@ export default function SidebarNavBlock({
         />
       </Row>
       <Row>
-        <NumberInput label="Padding X" value={data.paddingX || 24} onChange={(v) => handleChange("paddingX", v)} />
-        <NumberInput label="Padding Y" value={data.paddingY || 32} onChange={(v) => handleChange("paddingY", v)} />
+        <NumberInput
+          label="Padding X"
+          value={data.paddingX || 24}
+          onChange={(v) => handleChange("paddingX", v)}
+        />
+        <NumberInput
+          label="Padding Y"
+          value={data.paddingY || 32}
+          onChange={(v) => handleChange("paddingY", v)}
+        />
       </Row>
       <SectionHeading>Navigation Links</SectionHeading>
       {links.map((link, index) => (

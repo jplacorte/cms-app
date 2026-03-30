@@ -1,7 +1,5 @@
-import { NumberInput } from "@/lib/ui/NumberInput";
-import { SectionHeading } from "@/lib/ui/SectionHeading";
-import { SelectInput } from "@/lib/ui/SelectInput";
-import { TextInput } from "@/lib/ui/TextInput";
+import { NumberInput, SectionHeading, SelectInput, TextInput } from "@/lib/ui";
+
 import { StatCardData } from "@/lib/types";
 
 interface Props {
@@ -10,13 +8,14 @@ interface Props {
   handleChange: (key: string, value: unknown) => void;
 }
 
-export default function MetricsGrid({
-  data,
-  handleChange,
-}: Props) {
-  const metrics = (data.metrics as StatCardData[] || []);
+export default function MetricsGrid({ data, handleChange }: Props) {
+  const metrics = (data.metrics as StatCardData[]) || [];
 
-  const updateMetric = (index: number, field: keyof StatCardData, value: any) => {
+  const updateMetric = (
+    index: number,
+    field: keyof StatCardData,
+    value: any,
+  ) => {
     const newMetrics = [...metrics];
     newMetrics[index] = { ...newMetrics[index], [field]: value };
     handleChange("metrics", newMetrics);
@@ -51,9 +50,14 @@ export default function MetricsGrid({
       />
       <SectionHeading>Cards Data</SectionHeading>
       {metrics.map((metric, index) => (
-        <div key={index} className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+        <div
+          key={index}
+          className="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-100"
+        >
           <div className="flex justify-between items-center">
-            <span className="text-xs font-semibold text-slate-500">Metric {index + 1}</span>
+            <span className="text-xs font-semibold text-slate-500">
+              Metric {index + 1}
+            </span>
             <button
               onClick={() => removeMetric(index)}
               className="text-xs text-red-400 hover:text-red-600"
