@@ -2,8 +2,15 @@
 
 import { EditorBlock, useEditorStore } from "@/store/useEditorStore";
 import { AccordionItem, FooterColumn, FormField, NavLink, PricingTier, SocialLink, StatCardData } from "@/lib/types";
+import { useState, useRef } from "react";
+import NavbarBlock from "./properties/NavbarBlock";
 
-// Recursive helper to find a block anywhere in the nested tree
+// ==========================================
+// ⚙️ CLOUDINARY CONFIGURATION (From .env.local)
+// ==========================================
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "";
+const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "";
+
 const findBlockInTree = (
   blocks: EditorBlock[],
   id: string,
@@ -18,18 +25,125 @@ const findBlockInTree = (
   return undefined;
 };
 
-// --- Reusable field components ---
-
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return <label className="block text-xs text-slate-500 mb-1">{children}</label>;
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-sm font-semibold text-slate-800 border-b pb-2">
+    <h3 className="text-sm font-semibold text-slate-800 border-b pb-2 mt-4">
       {children}
     </h3>
   );
+}
+
+function RichTextInput({
+  label,
+  value,
+  onChange,
+  multiline = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  multiline?: boolean;
+}) {
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+
+  const applyStyle = (styleProp: string, styleValue: string) => {
+    const el = inputRef.current;
+    if (!el) return;
+    
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    
+    if (start === null || end === null || start === end) {
+      alert("Please highlight the text inside the input box first to apply a specific style!");
+      return;
+    }
+    
+    const selectedText = value.substring(start, end);
+    const wrappedText = `<span style="${styleProp}: ${styleValue};">${selectedText}</span>`;
+    const newValue = value.substring(0, start) + wrappedText + value.substring(end);
+    
+    onChange(newValue);
+  };
+
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between items-end mb-1">
+        <FieldLabel>{label}</FieldLabel>
+        <span className="text-[10px] text-blue-600 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded font-medium">Highlight text to style</span>
+      </div>
+      
+      <div className="flex flex-wrap items-center gap-1.5 p-1.5 border border-slate-200 border-b-0 rounded-t-md bg-slate-100">
+         <input 
+            type="color" 
+            className="w-6 h-6 p-0 border-0 rounded cursor-pointer" 
+            onChange={(e) => applyStyle('color', e.target.value)} 
+            title="Highlight text, then pick a color" 
+         />
+         <select 
+            className="text-[11px] p-1 rounded border border-slate-300 outline-none focus:border-blue-500 bg-white" 
+            onChange={(e) => { if(e.target.value) applyStyle('font-size', e.target.value); e.target.value=''; }} 
+            title="Font Size"
+         >
+           <option value="">Size...</option>
+           <option value="0.8em">Small (0.8x)</option>
+           <option value="1.2em">Large (1.2x)</option>
+           <option value="1.5em">X-Large (1.5x)</option>
+           <option value="2em">Huge (2x)</option>
+           <option value="12px">12px</option>
+           <option value="16px">16px</option>
+           <option value="24px">24px</option>
+           <option value="32px">32px</option>
+           <option value="48px">48px</option>
+           <option value="64px">64px</option>
+         </select>
+         <select 
+            className="text-[11px] p-1 rounded border border-slate-300 outline-none focus:border-blue-500 bg-white" 
+            onChange={(e) => { if(e.target.value) applyStyle('font-weight', e.target.value); e.target.value=''; }} 
+            title="Font Weight"
+         >
+           <option value="">Weight...</option>
+           <option value="300">Light</option>
+           <option value="400">Normal</option>
+           <option value="600">Semibold</option>
+           <option value="800">Bold</option>
+           <option value="900">Black</option>
+         </select>
+         <select 
+            className="text-[11px] p-1 rounded border border-slate-300 outline-none focus:border-blue-500 bg-white" 
+            onChange={(e) => { if(e.target.value) applyStyle('font-family', e.target.value); e.target.value=''; }} 
+            title="Font Family"
+         >
+           <option value="">Font...</option>
+           <option value="sans-serif">Sans-serif</option>
+           <option value="serif">Serif</option>
+           <option value="monospace">Monospace</option>
+           <option value="cursive">Cursive</option>
+         </select>
+      </div>
+      
+      {multiline ? (
+        <textarea 
+          ref={inputRef as any} 
+          value={value} 
+          onChange={e => onChange(e.target.value)} 
+          className="w-full text-sm text-slate-800 border border-slate-200 rounded-b-md p-2 outline-none focus:border-blue-500 font-mono leading-relaxed" 
+          rows={4} 
+        />
+      ) : (
+        <input 
+          ref={inputRef as any} 
+          type="text" 
+          value={value} 
+          onChange={e => onChange(e.target.value)} 
+          className="w-full text-sm text-slate-800 border border-slate-200 rounded-b-md p-2 outline-none focus:border-blue-500 font-mono" 
+        />
+      )}
+    </div>
+  )
 }
 
 function TextInput({
@@ -50,9 +164,112 @@ function TextInput({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full text-sm border border-slate-200 rounded p-2 outline-none focus:border-blue-500"
+        className="w-full text-sm text-black border border-slate-200 rounded p-2 outline-none focus:border-blue-500"
         placeholder={placeholder}
       />
+    </div>
+  );
+}
+
+function CheckboxInput({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        type="checkbox"
+        id={label}
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+      />
+      <label htmlFor={label} className="text-sm text-slate-600">{label}</label>
+    </div>
+  );
+}
+
+function ImageUploadInput({
+  label,
+  value,
+  onChange,
+  placeholder = "https://...",
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+      alert("Cloudinary configuration is missing in .env.local!");
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: "POST", body: formData }
+      );
+      const data = await response.json();
+      
+      if (data.secure_url) {
+        onChange(data.secure_url); 
+      } else {
+        console.error("Cloudinary upload error:", data);
+        alert("Upload failed. Check console for details.");
+      }
+    } catch (error) {
+      console.error("Error uploading to Cloudinary:", error);
+      alert("Error uploading image.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      <FieldLabel>{label}</FieldLabel>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="flex-1 text-sm text-black border border-slate-200 rounded p-2 outline-none focus:border-blue-500"
+          placeholder={placeholder}
+        />
+        <label
+          className={`flex items-center justify-center px-4 py-2 rounded text-sm font-medium transition-colors ${
+            isUploading
+              ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+              : "bg-blue-600 text-white cursor-pointer hover:bg-blue-700"
+          }`}
+        >
+          {isUploading ? "..." : "Upload"}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileUpload}
+            disabled={isUploading}
+          />
+        </label>
+      </div>
     </div>
   );
 }
@@ -74,7 +291,7 @@ function TextArea({
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full text-sm border border-slate-200 rounded p-2 outline-none focus:border-blue-500"
+        className="w-full text-sm text-black border border-slate-200 rounded p-2 outline-none focus:border-blue-500"
         rows={rows || 3}
       />
     </div>
@@ -103,7 +320,7 @@ function NumberInput({
         min={min}
         max={max}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full text-sm border border-slate-200 rounded p-2"
+        className="w-full text-sm text-black border border-slate-200 rounded p-2"
       />
     </div>
   );
@@ -118,7 +335,16 @@ function ColorInput({
   value: string;
   onChange: (v: string) => void;
 }) {
-  const isTransparent = value === "transparent";
+  const isTransparent = value === "transparent" || value === "none";
+
+  let pickerValue = "#000000";
+  if (!isTransparent && value) {
+    if (/^#[0-9A-F]{6}$/i.test(value)) {
+      pickerValue = value;
+    } else if (/^#[0-9A-F]{3}$/i.test(value)) {
+      pickerValue = `#${value[1]}${value[1]}${value[2]}${value[2]}${value[3]}${value[3]}`;
+    }
+  }
 
   return (
     <div className="flex-1">
@@ -136,15 +362,34 @@ function ColorInput({
           {isTransparent ? "Solid" : "None"}
         </button>
       </div>
-      <input
-        type="color"
-        value={isTransparent ? "#ffffff" : value}
-        disabled={isTransparent}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full h-8 rounded border border-slate-200 p-0.5 transition-opacity ${
-          isTransparent ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+      
+      <div 
+        className={`flex items-center gap-2 p-1 border border-slate-200 rounded bg-white focus-within:border-blue-500 transition-colors ${
+          isTransparent ? "opacity-50" : ""
         }`}
-      />
+      >
+        <div 
+          className="relative w-6 h-6 rounded border border-slate-200 overflow-hidden shrink-0"
+          style={{ backgroundColor: isTransparent ? "#ffffff" : value }}
+        >
+          <input
+            type="color"
+            value={pickerValue}
+            disabled={isTransparent}
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] cursor-pointer opacity-0"
+          />
+        </div>
+        
+        <input
+          type="text"
+          value={value}
+          disabled={isTransparent}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full text-xs text-black border-none outline-none bg-transparent font-mono"
+          placeholder="#FFFFFF"
+        />
+      </div>
     </div>
   );
 }
@@ -156,7 +401,7 @@ function SelectInput({
   options,
 }: {
   label: string;
-  value: string;
+  value: string | number;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
 }) {
@@ -164,9 +409,9 @@ function SelectInput({
     <div className="flex-1">
       <FieldLabel>{label}</FieldLabel>
       <select
-        value={value}
+        value={String(value)}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full text-sm border border-slate-200 rounded p-2 outline-none focus:border-blue-500 bg-white"
+        className="w-full text-sm text-black border border-slate-200 rounded p-2 outline-none focus:border-blue-500 bg-white"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -181,8 +426,6 @@ function SelectInput({
 function Row({ children }: { children: React.ReactNode }) {
   return <div className="flex gap-4">{children}</div>;
 }
-
-// --- Main Component ---
 
 export default function PropertiesPanel() {
   const { blocks, activeBlockId, updateBlock, setActiveBlock } =
@@ -208,6 +451,30 @@ export default function PropertiesPanel() {
     updateBlock(activeBlock.id, { [key]: value });
   };
 
+  const weightOptions = [
+    { value: "300", label: "Light" },
+    { value: "400", label: "Normal" },
+    { value: "500", label: "Medium" },
+    { value: "600", label: "Semibold" },
+    { value: "700", label: "Bold" },
+    { value: "800", label: "Extra Bold" },
+    { value: "900", label: "Black" },
+  ];
+  
+  const transformOptions = [
+    { value: "none", label: "Normal" },
+    { value: "uppercase", label: "UPPERCASE" },
+    { value: "lowercase", label: "lowercase" },
+    { value: "capitalize", label: "Capitalize" },
+  ];
+
+  const textAlignOptions = [
+    { value: "left", label: "Left" },
+    { value: "center", label: "Center" },
+    { value: "right", label: "Right" },
+    { value: "justify", label: "Justify" },
+  ];
+
   return (
     <div className="w-96 bg-white border-l border-slate-200 flex flex-col h-full shadow-[-4px_0_24px_rgba(0,0,0,0.02)] z-10 overflow-y-auto shrink-0">
       <div className="flex justify-between items-center p-4 border-b border-slate-100 sticky top-0 bg-white z-20">
@@ -218,49 +485,132 @@ export default function PropertiesPanel() {
           onClick={() => setActiveBlock(null)}
           className="text-slate-400 hover:text-slate-600 text-lg"
         >
-          &times;
+          ×
         </button>
       </div>
 
       <div className="p-6 space-y-6">
-        {/* HERO SECTION */}
+        
+        {/* HERO SECTION COMPONENT MAP */}
         {activeBlock.type === "HeroSection" && (
           <>
             <div className="space-y-4">
-              <SectionHeading>Content</SectionHeading>
-              <TextInput label="Heading" value={data.heading || ""} onChange={(v) => handleChange("heading", v)} />
-              <TextArea label="Subheading" value={data.subheading || ""} onChange={(v) => handleChange("subheading", v)} />
+              <SectionHeading>Layout</SectionHeading>
+              <SelectInput label="Layout Style" value={data.layout || "split"} onChange={(v) => handleChange("layout", v)} options={[
+                { value: "split", label: "Split (Text + Image)" },
+                { value: "center", label: "Centered Text" },
+              ]} />
             </div>
+
             <div className="space-y-4">
-              <SectionHeading>Colors</SectionHeading>
+              <SectionHeading>Hero Text Inputs (With Style Tool)</SectionHeading>
+              <TextInput label="Badge Text" value={data.badgeText || ""} onChange={(v) => handleChange("badgeText", v)} placeholder="e.g. ✨ New Features" />
+              <TextInput label="Badge Link URL" value={data.badgeLink || ""} onChange={(v) => handleChange("badgeLink", v)} />
+              
+              <RichTextInput label="Main Heading" value={data.heading || ""} onChange={(v) => handleChange("heading", v)} multiline={true} />
+              <RichTextInput label="Subheading" value={data.subheading || ""} onChange={(v) => handleChange("subheading", v)} multiline={true} />
+              <RichTextInput label="Bottom Text" value={data.bottomText || ""} onChange={(v) => handleChange("bottomText", v)} multiline={true} />
+            </div>
+
+            <div className="space-y-4">
+              <SectionHeading>Typography Defaults: Main Heading</SectionHeading>
               <Row>
-                <ColorInput label="Background" value={data.bgColor || "#0f172a"} onChange={(v) => handleChange("bgColor", v)} />
-                <ColorInput label="Heading" value={data.headingColor || "#ffffff"} onChange={(v) => handleChange("headingColor", v)} />
+                <NumberInput label="Size (px)" value={data.headingFontSize ?? 72} onChange={(v) => handleChange("headingFontSize", v)} min={12} max={120} />
+                <SelectInput label="Weight" value={data.headingFontWeight || "800"} onChange={(v) => handleChange("headingFontWeight", v)} options={weightOptions} />
               </Row>
               <Row>
-                <ColorInput label="Subheading" value={data.subheadingColor || "#94a3b8"} onChange={(v) => handleChange("subheadingColor", v)} />
-                <SelectInput label="Text Align" value={data.textAlign || "center"} onChange={(v) => handleChange("textAlign", v)} options={[
-                  { value: "left", label: "Left" },
-                  { value: "center", label: "Center" },
-                  { value: "right", label: "Right" },
-                ]} />
+                <ColorInput label="Color" value={data.headingColor || "#ffffff"} onChange={(v) => handleChange("headingColor", v)} />
+                <SelectInput label="Format" value={data.headingTransform || "none"} onChange={(v) => handleChange("headingTransform", v)} options={transformOptions} />
               </Row>
+
+              <SectionHeading>Typography Defaults: Subheading</SectionHeading>
+              <Row>
+                <NumberInput label="Size (px)" value={data.subheadingFontSize ?? 20} onChange={(v) => handleChange("subheadingFontSize", v)} min={12} max={64} />
+                <SelectInput label="Weight" value={data.subheadingFontWeight || "500"} onChange={(v) => handleChange("subheadingFontWeight", v)} options={weightOptions} />
+              </Row>
+              <Row>
+                <ColorInput label="Color" value={data.subheadingColor || "#a1a1aa"} onChange={(v) => handleChange("subheadingColor", v)} />
+                <SelectInput label="Format" value={data.subheadingTransform || "none"} onChange={(v) => handleChange("subheadingTransform", v)} options={transformOptions} />
+              </Row>
+
+              <SectionHeading>Typography Defaults: Bottom Text</SectionHeading>
+              <Row>
+                <NumberInput label="Size (px)" value={data.bottomTextFontSize ?? 14} onChange={(v) => handleChange("bottomTextFontSize", v)} min={10} max={32} />
+                <SelectInput label="Weight" value={data.bottomTextFontWeight || "400"} onChange={(v) => handleChange("bottomTextFontWeight", v)} options={weightOptions} />
+              </Row>
+              <SelectInput label="Format" value={data.bottomTextTransform || "uppercase"} onChange={(v) => handleChange("bottomTextTransform", v)} options={transformOptions} />
             </div>
+
+            {data.layout === "split" && (
+              <div className="space-y-4">
+                <SectionHeading>Right Image / Graphic</SectionHeading>
+                <ImageUploadInput label="Upload Graphic" value={data.imageUrl || ""} onChange={(v) => handleChange("imageUrl", v)} />
+              </div>
+            )}
+
             <div className="space-y-4">
-              <SectionHeading>Button</SectionHeading>
+              <SectionHeading>Colors & Alignment</SectionHeading>
+              <Row>
+                <ColorInput label="Background" value={data.bgColor || "#000000"} onChange={(v) => handleChange("bgColor", v)} />
+                <SelectInput label="Text Align" value={data.textAlign || "left"} onChange={(v) => handleChange("textAlign", v)} options={textAlignOptions} />
+              </Row>
+              <CheckboxInput label="Ambient Glow Effect" checked={data.showAmbientGlow !== false} onChange={(v) => handleChange("showAmbientGlow", v)} />
+            </div>
+
+            <div className="space-y-4">
+              <SectionHeading>Primary CTA Button</SectionHeading>
               <TextInput label="Button Text" value={data.ctaText || ""} onChange={(v) => handleChange("ctaText", v)} />
               <TextInput label="Button Link" value={data.ctaLink || ""} onChange={(v) => handleChange("ctaLink", v)} />
               <Row>
-                <ColorInput label="Button BG" value={data.buttonBgColor || "#2563eb"} onChange={(v) => handleChange("buttonBgColor", v)} />
-                <ColorInput label="Button Text" value={data.buttonTextColor || "#ffffff"} onChange={(v) => handleChange("buttonTextColor", v)} />
+                <NumberInput label="Font Size (px)" value={data.ctaFontSize ?? 15} onChange={(v) => handleChange("ctaFontSize", v)} />
+                <SelectInput label="Font Weight" value={data.ctaFontWeight || "600"} onChange={(v) => handleChange("ctaFontWeight", v)} options={weightOptions} />
               </Row>
-              <SelectInput label="Border Radius" value={data.buttonRadius || "9999px"} onChange={(v) => handleChange("buttonRadius", v)} options={[
-                { value: "0px", label: "Square" },
-                { value: "8px", label: "Rounded (Small)" },
-                { value: "16px", label: "Rounded (Large)" },
-                { value: "9999px", label: "Pill" },
-              ]} />
+              <Row>
+                <ColorInput label="Background" value={data.ctaBgColor || "#ffffff"} onChange={(v) => handleChange("ctaBgColor", v)} />
+                <ColorInput label="Text Color" value={data.ctaTextColor || "#000000"} onChange={(v) => handleChange("ctaTextColor", v)} />
+              </Row>
+              <Row>
+                <ColorInput label="Hover BG" value={data.ctaHoverBgColor || "#e2e8f0"} onChange={(v) => handleChange("ctaHoverBgColor", v)} />
+                <ColorInput label="Hover Text" value={data.ctaHoverTextColor || "#000000"} onChange={(v) => handleChange("ctaHoverTextColor", v)} />
+              </Row>
+              <Row>
+                <NumberInput label="Padding X" value={data.ctaPaddingX ?? 24} onChange={(v) => handleChange("ctaPaddingX", v)} />
+                <NumberInput label="Padding Y" value={data.ctaPaddingY ?? 14} onChange={(v) => handleChange("ctaPaddingY", v)} />
+              </Row>
+              <Row>
+                <NumberInput label="Border Width" value={data.ctaBorderWidth || 0} onChange={(v) => handleChange("ctaBorderWidth", v)} />
+                <TextInput label="Border Radius" value={data.ctaBorderRadius || "8px"} onChange={(v) => handleChange("ctaBorderRadius", v)} />
+              </Row>
+              <ColorInput label="Border Color" value={data.ctaBorderColor || "transparent"} onChange={(v) => handleChange("ctaBorderColor", v)} />
             </div>
+
+            <div className="space-y-4">
+              <SectionHeading>Secondary CTA Button</SectionHeading>
+              <TextInput label="Button Text" value={data.cta2Text || ""} onChange={(v) => handleChange("cta2Text", v)} />
+              <TextInput label="Button Link" value={data.cta2Link || ""} onChange={(v) => handleChange("cta2Link", v)} />
+              <Row>
+                <NumberInput label="Font Size (px)" value={data.cta2FontSize ?? 15} onChange={(v) => handleChange("cta2FontSize", v)} />
+                <SelectInput label="Font Weight" value={data.cta2FontWeight || "600"} onChange={(v) => handleChange("cta2FontWeight", v)} options={weightOptions} />
+              </Row>
+              <Row>
+                <ColorInput label="Background" value={data.cta2BgColor || "transparent"} onChange={(v) => handleChange("cta2BgColor", v)} />
+                <ColorInput label="Text Color" value={data.cta2TextColor || "#ffffff"} onChange={(v) => handleChange("cta2TextColor", v)} />
+              </Row>
+              <Row>
+                <ColorInput label="Hover BG" value={data.cta2HoverBgColor || "rgba(255,255,255,0.1)"} onChange={(v) => handleChange("cta2HoverBgColor", v)} />
+                <ColorInput label="Hover Text" value={data.cta2HoverTextColor || "#ffffff"} onChange={(v) => handleChange("cta2HoverTextColor", v)} />
+              </Row>
+              <Row>
+                <NumberInput label="Padding X" value={data.cta2PaddingX ?? 24} onChange={(v) => handleChange("cta2PaddingX", v)} />
+                <NumberInput label="Padding Y" value={data.cta2PaddingY ?? 14} onChange={(v) => handleChange("cta2PaddingY", v)} />
+              </Row>
+              <Row>
+                <NumberInput label="Border Width" value={data.cta2BorderWidth ?? 1} onChange={(v) => handleChange("cta2BorderWidth", v)} />
+                <TextInput label="Border Radius" value={data.cta2BorderRadius || "8px"} onChange={(v) => handleChange("cta2BorderRadius", v)} />
+              </Row>
+              <ColorInput label="Border Color" value={data.cta2BorderColor || "#334155"} onChange={(v) => handleChange("cta2BorderColor", v)} />
+            </div>
+
           </>
         )}
 
@@ -280,12 +630,7 @@ export default function PropertiesPanel() {
             </Row>
             <Row>
               <NumberInput label="Font Size" value={data.fontSize || 16} onChange={(v) => handleChange("fontSize", v)} />
-              <SelectInput label="Font Weight" value={data.fontWeight || "600"} onChange={(v) => handleChange("fontWeight", v)} options={[
-                { value: "400", label: "Normal" },
-                { value: "500", label: "Medium" },
-                { value: "600", label: "Semibold" },
-                { value: "700", label: "Bold" },
-              ]} />
+              <SelectInput label="Font Weight" value={data.fontWeight || "600"} onChange={(v) => handleChange("fontWeight", v)} options={weightOptions} />
             </Row>
             <TextInput label="Border Radius" value={data.borderRadius || "4px"} onChange={(v) => handleChange("borderRadius", v)} />
             <Row>
@@ -312,21 +657,10 @@ export default function PropertiesPanel() {
             </Row>
             <Row>
               <NumberInput label="Font Size" value={data.fontSize || 16} onChange={(v) => handleChange("fontSize", v)} />
-              <SelectInput label="Weight" value={data.fontWeight || "400"} onChange={(v) => handleChange("fontWeight", v)} options={[
-                { value: "300", label: "Light" },
-                { value: "400", label: "Normal" },
-                { value: "500", label: "Medium" },
-                { value: "600", label: "Semibold" },
-                { value: "700", label: "Bold" },
-                { value: "800", label: "Extra Bold" },
-              ]} />
+              <SelectInput label="Weight" value={data.fontWeight || "400"} onChange={(v) => handleChange("fontWeight", v)} options={weightOptions} />
             </Row>
             <Row>
-              <SelectInput label="Alignment" value={data.textAlign || "left"} onChange={(v) => handleChange("textAlign", v)} options={[
-                { value: "left", label: "Left" },
-                { value: "center", label: "Center" },
-                { value: "right", label: "Right" },
-              ]} />
+              <SelectInput label="Alignment" value={data.textAlign || "left"} onChange={(v) => handleChange("textAlign", v)} options={textAlignOptions} />
               <SelectInput label="Line Height" value={data.lineHeight || "1.6"} onChange={(v) => handleChange("lineHeight", v)} options={[
                 { value: "1", label: "Tight" },
                 { value: "1.4", label: "Normal" },
@@ -342,7 +676,7 @@ export default function PropertiesPanel() {
         {activeBlock.type === "ImageBlock" && (
           <div className="space-y-4">
             <SectionHeading>Image Settings</SectionHeading>
-            <TextInput label="Image URL" value={data.src || ""} onChange={(v) => handleChange("src", v)} placeholder="https://..." />
+            <ImageUploadInput label="Image URL" value={data.src || ""} onChange={(v) => handleChange("src", v)} placeholder="https://..." />
             <TextInput label="Alt Text" value={data.alt || ""} onChange={(v) => handleChange("alt", v)} placeholder="Description of image" />
             <Row>
               <NumberInput label="Width (%)" value={data.width || 100} onChange={(v) => handleChange("width", v)} max={100} />
@@ -554,7 +888,7 @@ export default function PropertiesPanel() {
                     newItems[index] = { ...newItems[index], question: e.target.value };
                     handleChange("items", newItems);
                   }}
-                  className="w-full text-sm border border-slate-200 rounded p-2"
+                  className="w-full text-sm text-black border border-slate-200 rounded p-2"
                   placeholder="Question"
                 />
                 <textarea
@@ -564,7 +898,7 @@ export default function PropertiesPanel() {
                     newItems[index] = { ...newItems[index], answer: e.target.value };
                     handleChange("items", newItems);
                   }}
-                  className="w-full text-sm border border-slate-200 rounded p-2"
+                  className="w-full text-sm text-black border border-slate-200 rounded p-2"
                   rows={2}
                   placeholder="Answer"
                 />
@@ -600,7 +934,7 @@ export default function PropertiesPanel() {
               <TextInput label="Name" value={data.name || ""} onChange={(v) => handleChange("name", v)} />
               <TextInput label="Title" value={data.title || ""} onChange={(v) => handleChange("title", v)} />
             </Row>
-            <TextInput label="Avatar URL" value={data.avatarUrl || ""} onChange={(v) => handleChange("avatarUrl", v)} placeholder="https://..." />
+            <ImageUploadInput label="Avatar URL" value={data.avatarUrl || ""} onChange={(v) => handleChange("avatarUrl", v)} placeholder="https://..." />
             <SectionHeading>Colors</SectionHeading>
             <Row>
               <ColorInput label="Background" value={data.bgColor || "#f8fafc"} onChange={(v) => handleChange("bgColor", v)} />
@@ -632,22 +966,22 @@ export default function PropertiesPanel() {
                 </div>
                 <input type="text" value={tier.name} onChange={(e) => {
                   const t = [...(data.tiers as PricingTier[] || [])]; t[index] = { ...t[index], name: e.target.value }; handleChange("tiers", t);
-                }} className="w-full text-sm border border-slate-200 rounded p-2" placeholder="Tier name" />
+                }} className="w-full text-sm text-black border border-slate-200 rounded p-2" placeholder="Tier name" />
                 <div className="flex gap-2">
                   <input type="text" value={tier.price} onChange={(e) => {
                     const t = [...(data.tiers as PricingTier[] || [])]; t[index] = { ...t[index], price: e.target.value }; handleChange("tiers", t);
-                  }} className="flex-1 text-sm border border-slate-200 rounded p-2" placeholder="$29" />
+                  }} className="flex-1 text-sm text-black border border-slate-200 rounded p-2" placeholder="$29" />
                   <input type="text" value={tier.period} onChange={(e) => {
                     const t = [...(data.tiers as PricingTier[] || [])]; t[index] = { ...t[index], period: e.target.value }; handleChange("tiers", t);
-                  }} className="flex-1 text-sm border border-slate-200 rounded p-2" placeholder="/month" />
+                  }} className="flex-1 text-sm text-black border border-slate-200 rounded p-2" placeholder="/month" />
                 </div>
                 <textarea value={(tier.features || []).join("\n")} onChange={(e) => {
                   const t = [...(data.tiers as PricingTier[] || [])]; t[index] = { ...t[index], features: e.target.value.split("\n") }; handleChange("tiers", t);
-                }} className="w-full text-sm border border-slate-200 rounded p-2" rows={3} placeholder="One feature per line" />
+                }} className="w-full text-sm text-black border border-slate-200 rounded p-2" rows={3} placeholder="One feature per line" />
                 <div className="flex gap-2">
                   <input type="text" value={tier.ctaText || ""} onChange={(e) => {
                     const t = [...(data.tiers as PricingTier[] || [])]; t[index] = { ...t[index], ctaText: e.target.value }; handleChange("tiers", t);
-                  }} className="flex-1 text-sm border border-slate-200 rounded p-2" placeholder="CTA Text" />
+                  }} className="flex-1 text-sm text-black border border-slate-200 rounded p-2" placeholder="CTA Text" />
                   <label className="flex items-center gap-1 text-xs text-slate-500">
                     <input type="checkbox" checked={tier.highlighted || false} onChange={(e) => {
                       const t = [...(data.tiers as PricingTier[] || [])]; t[index] = { ...t[index], highlighted: e.target.checked }; handleChange("tiers", t);
@@ -673,101 +1007,7 @@ export default function PropertiesPanel() {
 
         {/* NAVBAR BLOCK */}
         {activeBlock.type === "NavbarBlock" && (
-          <div className="space-y-4">
-            <SectionHeading>Navbar</SectionHeading>
-            <TextInput label="Logo Text" value={data.logoText || ""} onChange={(v) => handleChange("logoText", v)} />
-            <TextInput label="Logo Image URL" value={data.logoUrl || ""} onChange={(v) => handleChange("logoUrl", v)} placeholder="https://..." />
-            <Row>
-              <ColorInput label="Background" value={data.bgColor || "#ffffff"} onChange={(v) => handleChange("bgColor", v)} />
-              <ColorInput label="Text" value={data.textColor || "#0f172a"} onChange={(v) => handleChange("textColor", v)} />
-            </Row>
-            <ColorInput label="Link Color" value={data.linkColor || "#475569"} onChange={(v) => handleChange("linkColor", v)} />
-            <SectionHeading>Navigation Links</SectionHeading>
-            {(data.links as NavLink[] || []).map((link: NavLink, index: number) => (
-              <div key={index} className="space-y-2 border border-slate-200 p-3 rounded-lg bg-slate-50">
-                <div className="flex gap-2 items-center">
-                  <input type="text" value={link.label} onChange={(e) => {
-                    const l = [...(data.links as NavLink[] || [])]; l[index] = { ...l[index], label: e.target.value }; handleChange("links", l);
-                  }} className="flex-[0.8] min-w-0 text-sm border border-slate-300 rounded p-2" placeholder="Label" />
-                  <input type="text" value={link.href} onChange={(e) => {
-                    const l = [...(data.links as NavLink[] || [])]; l[index] = { ...l[index], href: e.target.value }; handleChange("links", l);
-                  }} className="flex-1 min-w-0 text-sm border border-slate-300 rounded p-2" placeholder="/path" />
-                  <button onClick={() => {
-                    const l = [...(data.links as NavLink[] || [])]; l.splice(index, 1); handleChange("links", l);
-                  }} className="text-red-400 hover:text-red-600 text-sm">×</button>
-                </div>
-                {/* SUBLINKS */}
-                <div className="pl-4 space-y-2 border-l-2 border-slate-200">
-                  <div className="text-xs font-medium text-slate-500">Dropdown Links</div>
-                  {(link.sublinks || []).map((sublink, subIndex) => (
-                    <div key={subIndex} className="flex gap-2 items-center">
-                      <input type="text" value={sublink.label} onChange={(e) => {
-                        const l = [...(data.links as NavLink[] || [])]; 
-                        l[index].sublinks = [...(l[index].sublinks || [])];
-                        l[index].sublinks![subIndex] = { ...l[index].sublinks![subIndex], label: e.target.value };
-                        handleChange("links", l);
-                      }} className="flex-[0.8] min-w-0 text-xs border border-slate-200 rounded p-1.5" placeholder="Sub-label" />
-                      <input type="text" value={sublink.href} onChange={(e) => {
-                        const l = [...(data.links as NavLink[] || [])]; 
-                        l[index].sublinks = [...(l[index].sublinks || [])];
-                        l[index].sublinks![subIndex] = { ...l[index].sublinks![subIndex], href: e.target.value };
-                        handleChange("links", l);
-                      }} className="flex-1 min-w-0 text-xs border border-slate-200 rounded p-1.5" placeholder="/sub-path" />
-                      <button onClick={() => {
-                        const l = [...(data.links as NavLink[] || [])]; 
-                        l[index].sublinks = [...(l[index].sublinks || [])];
-                        l[index].sublinks!.splice(subIndex, 1);
-                        handleChange("links", l);
-                      }} className="text-red-400 hover:text-red-600 text-sm">×</button>
-                    </div>
-                  ))}
-                  <button onClick={() => {
-                    const l = [...(data.links as NavLink[] || [])];
-                    l[index].sublinks = [...(l[index].sublinks || []), { label: "New Sublink", href: "#" }];
-                    handleChange("links", l);
-                  }} className="text-xs text-blue-600 font-medium">
-                    + Add Dropdown Link
-                  </button>
-                </div>
-              </div>
-            ))}
-            <button onClick={() => {
-              handleChange("links", [...(data.links as NavLink[] || []), { label: "New Link", href: "#" }]);
-            }} className="w-full py-2 text-sm text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
-              + Add Root Link
-            </button>
-            <SectionHeading>Styles & Layout</SectionHeading>
-            <Row>
-              <SelectInput label="Border Style" value={data.borderStyle || "solid"} onChange={(v) => handleChange("borderStyle", v)} options={[
-                { value: "none", label: "None" },
-                { value: "solid", label: "Solid" },
-                { value: "dashed", label: "Dashed" },
-              ]} />
-              <NumberInput label="Border Width" value={data.borderWidth as number ?? 1} onChange={(v) => handleChange("borderWidth", v)} />
-            </Row>
-            <Row>
-              <ColorInput label="Border Color" value={data.borderColor || "#e2e8f0"} onChange={(v) => handleChange("borderColor", v)} />
-              <SelectInput label="Shadow" value={data.shadow ? "true" : "false"} onChange={(v) => handleChange("shadow", v === "true")} options={[
-                { value: "false", label: "None" },
-                { value: "true", label: "Soft Shadow" },
-              ]} />
-            </Row>
-            <Row>
-              <SelectInput label="Outline Style" value={data.outlineStyle || "none"} onChange={(v) => handleChange("outlineStyle", v)} options={[
-                { value: "none", label: "None" },
-                { value: "solid", label: "Solid" },
-                { value: "dashed", label: "Dashed" },
-              ]} />
-              <ColorInput label="Outline Color" value={data.outlineColor || "#3b82f6"} onChange={(v) => handleChange("outlineColor", v)} />
-            </Row>
-            <SectionHeading>CTA Button</SectionHeading>
-            <TextInput label="CTA Text" value={data.ctaText || ""} onChange={(v) => handleChange("ctaText", v)} />
-            <TextInput label="CTA Link" value={data.ctaLink || ""} onChange={(v) => handleChange("ctaLink", v)} />
-            <Row>
-              <ColorInput label="CTA BG" value={data.ctaBgColor || "#2563eb"} onChange={(v) => handleChange("ctaBgColor", v)} />
-              <ColorInput label="CTA Text" value={data.ctaTextColor || "#ffffff"} onChange={(v) => handleChange("ctaTextColor", v)} />
-            </Row>
-          </div>
+          <NavbarBlock data={data} weightOptions={weightOptions} handleChange={handleChange} />
         )}
 
         {/* SIDEBAR NAV BLOCK */}
@@ -775,7 +1015,8 @@ export default function PropertiesPanel() {
           <div className="space-y-4">
             <SectionHeading>Sidebar Navigation</SectionHeading>
             <TextInput label="Logo Text" value={data.logoText || ""} onChange={(v) => handleChange("logoText", v)} />
-            <TextInput label="Logo Image URL" value={data.logoUrl || ""} onChange={(v) => handleChange("logoUrl", v)} placeholder="https://..." />
+            <ImageUploadInput label="Logo Image URL" value={data.logoUrl || ""} onChange={(v) => handleChange("logoUrl", v)} placeholder="https://..." />
+            <NumberInput label="Logo Height (px)" value={data.logoHeight || 32} onChange={(v) => handleChange("logoHeight", v)} min={16} max={120} />
             <Row>
               <ColorInput label="Background" value={data.bgColor || "#ffffff"} onChange={(v) => handleChange("bgColor", v)} />
               <ColorInput label="Border Color" value={data.borderColor || "#e2e8f0"} onChange={(v) => handleChange("borderColor", v)} />
@@ -793,10 +1034,10 @@ export default function PropertiesPanel() {
               <div key={index} className="flex gap-2 items-center">
                 <input type="text" value={link.label} onChange={(e) => {
                   const l = [...(data.links as NavLink[] || [])]; l[index] = { ...l[index], label: e.target.value }; handleChange("links", l);
-                }} className="flex-1 text-sm border border-slate-200 rounded p-2" placeholder="Label" />
+                }} className="flex-1 text-sm text-black border border-slate-200 rounded p-2" placeholder="Label" />
                 <input type="text" value={link.href} onChange={(e) => {
                   const l = [...(data.links as NavLink[] || [])]; l[index] = { ...l[index], href: e.target.value }; handleChange("links", l);
-                }} className="flex-1 text-sm border border-slate-200 rounded p-2" placeholder="/path" />
+                }} className="flex-1 text-sm text-black border border-slate-200 rounded p-2" placeholder="/path" />
                 <button onClick={() => {
                   const l = [...(data.links as NavLink[] || [])]; l.splice(index, 1); handleChange("links", l);
                 }} className="text-red-400 hover:text-red-600 text-sm">×</button>
@@ -836,7 +1077,7 @@ export default function PropertiesPanel() {
                 <div className="flex justify-between items-center">
                   <input type="text" value={col.heading} onChange={(e) => {
                     const c = [...(data.columns as FooterColumn[] || [])]; c[ci] = { ...c[ci], heading: e.target.value }; handleChange("columns", c);
-                  }} className="text-sm font-semibold border border-slate-200 rounded p-1 flex-1" />
+                  }} className="text-sm font-semibold text-black border border-slate-200 rounded p-1 flex-1" />
                   <button onClick={() => {
                     const c = [...(data.columns as FooterColumn[] || [])]; c.splice(ci, 1); handleChange("columns", c);
                   }} className="text-red-400 hover:text-red-600 text-sm ml-2">×</button>
@@ -845,10 +1086,10 @@ export default function PropertiesPanel() {
                   <div key={li} className="flex gap-1 items-center">
                     <input type="text" value={link.label} onChange={(e) => {
                       const c = [...(data.columns as FooterColumn[] || [])]; const links = [...c[ci].links]; links[li] = { ...links[li], label: e.target.value }; c[ci] = { ...c[ci], links }; handleChange("columns", c);
-                    }} className="flex-1 text-xs border border-slate-200 rounded p-1.5" placeholder="Label" />
+                    }} className="flex-1 text-xs text-black border border-slate-200 rounded p-1.5" placeholder="Label" />
                     <input type="text" value={link.href} onChange={(e) => {
                       const c = [...(data.columns as FooterColumn[] || [])]; const links = [...c[ci].links]; links[li] = { ...links[li], href: e.target.value }; c[ci] = { ...c[ci], links }; handleChange("columns", c);
-                    }} className="flex-1 text-xs border border-slate-200 rounded p-1.5" placeholder="/path" />
+                    }} className="flex-1 text-xs text-black border border-slate-200 rounded p-1.5" placeholder="/path" />
                     <button onClick={() => {
                       const c = [...(data.columns as FooterColumn[] || [])]; const links = [...c[ci].links]; links.splice(li, 1); c[ci] = { ...c[ci], links }; handleChange("columns", c);
                     }} className="text-red-400 text-xs">×</button>
@@ -889,11 +1130,11 @@ export default function PropertiesPanel() {
                 </div>
                 <input type="text" value={field.label} onChange={(e) => {
                   const f = [...(data.fields as FormField[] || [])]; f[index] = { ...f[index], label: e.target.value }; handleChange("fields", f);
-                }} className="w-full text-sm border border-slate-200 rounded p-2" placeholder="Field label" />
+                }} className="w-full text-sm text-black border border-slate-200 rounded p-2" placeholder="Field label" />
                 <div className="flex gap-2">
                   <select value={field.type} onChange={(e) => {
                     const f = [...(data.fields as FormField[] || [])]; f[index] = { ...f[index], type: e.target.value }; handleChange("fields", f);
-                  }} className="flex-1 text-sm border border-slate-200 rounded p-2 bg-white">
+                  }} className="flex-1 text-sm text-black border border-slate-200 rounded p-2 bg-white">
                     <option value="text">Text</option>
                     <option value="email">Email</option>
                     <option value="tel">Phone</option>
@@ -901,7 +1142,7 @@ export default function PropertiesPanel() {
                   </select>
                   <input type="text" value={field.placeholder} onChange={(e) => {
                     const f = [...(data.fields as FormField[] || [])]; f[index] = { ...f[index], placeholder: e.target.value }; handleChange("fields", f);
-                  }} className="flex-1 text-sm border border-slate-200 rounded p-2" placeholder="Placeholder" />
+                  }} className="flex-1 text-sm text-black border border-slate-200 rounded p-2" placeholder="Placeholder" />
                 </div>
               </div>
             ))}
@@ -917,7 +1158,7 @@ export default function PropertiesPanel() {
         {activeBlock.type === "CardBlock" && (
           <div className="space-y-4">
             <SectionHeading>Card</SectionHeading>
-            <TextInput label="Image URL" value={data.imageUrl || ""} onChange={(v) => handleChange("imageUrl", v)} placeholder="https://..." />
+            <ImageUploadInput label="Image URL" value={data.imageUrl || ""} onChange={(v) => handleChange("imageUrl", v)} placeholder="https://..." />
             <NumberInput label="Image Height (px)" value={parseInt(data.imageHeight) || 200} onChange={(v) => handleChange("imageHeight", `${v}px`)} />
             <TextInput label="Title" value={data.title || ""} onChange={(v) => handleChange("title", v)} />
             <TextArea label="Description" value={data.description || ""} onChange={(v) => handleChange("description", v)} />
@@ -947,11 +1188,7 @@ export default function PropertiesPanel() {
               <NumberInput label="Icon Size" value={data.iconSize || 20} onChange={(v) => handleChange("iconSize", v)} min={12} max={48} />
             </Row>
             <Row>
-              <SelectInput label="Alignment" value={data.alignment || "center"} onChange={(v) => handleChange("alignment", v)} options={[
-                { value: "flex-start", label: "Left" },
-                { value: "center", label: "Center" },
-                { value: "flex-end", label: "Right" },
-              ]} />
+              <SelectInput label="Alignment" value={data.alignment || "center"} onChange={(v) => handleChange("alignment", v)} options={textAlignOptions} />
               <NumberInput label="Gap (px)" value={data.gap || 16} onChange={(v) => handleChange("gap", v)} />
             </Row>
             <SectionHeading>Links</SectionHeading>
@@ -959,7 +1196,7 @@ export default function PropertiesPanel() {
               <div key={index} className="flex gap-2 items-center">
                 <select value={link.platform} onChange={(e) => {
                   const l = [...(data.links as SocialLink[] || [])]; l[index] = { ...l[index], platform: e.target.value }; handleChange("links", l);
-                }} className="flex-1 text-sm border border-slate-200 rounded p-2 bg-white">
+                }} className="flex-1 text-sm text-black border border-slate-200 rounded p-2 bg-white">
                   <option value="twitter">Twitter</option>
                   <option value="facebook">Facebook</option>
                   <option value="instagram">Instagram</option>
@@ -969,7 +1206,7 @@ export default function PropertiesPanel() {
                 </select>
                 <input type="text" value={link.url} onChange={(e) => {
                   const l = [...(data.links as SocialLink[] || [])]; l[index] = { ...l[index], url: e.target.value }; handleChange("links", l);
-                }} className="flex-1 text-sm border border-slate-200 rounded p-2" placeholder="https://..." />
+                }} className="flex-1 text-sm text-black border border-slate-200 rounded p-2" placeholder="https://..." />
                 <button onClick={() => {
                   const l = [...(data.links as SocialLink[] || [])]; l.splice(index, 1); handleChange("links", l);
                 }} className="text-red-400 hover:text-red-600 text-sm">×</button>

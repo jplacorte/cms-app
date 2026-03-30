@@ -34,8 +34,8 @@ export default async function PublicPage({
   const blocks = pageData.blocks as EditorBlock[];
 
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col items-center">
-      <div className="w-full max-w-5xl mx-auto p-12 overflow-y-auto space-y-4">
+    <main className="min-h-screen bg-white flex flex-col">
+      <div className="w-full flex flex-col">
         {blocks.map((block) => (
           <DynamicBlockWrapper key={block.id} block={block} isEditor={false} />
         ))}
