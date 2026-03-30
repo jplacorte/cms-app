@@ -3,7 +3,7 @@ import { pages } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { EditorBlock } from "@/store/useEditorStore";
 import { notFound } from "next/navigation";
-import DynamicBlockWrapper from "@/components/editor/wrappers/DynamicBlockWrapper";
+import DynamicBlockWrapper from "@/components/Editor/Wrappers/DynamicBlockWrapper";
 
 // FIX 1: Prevent Next.js from caching 404s.
 // Because this is a CMS, we want the page to fetch fresh from the database every single time.

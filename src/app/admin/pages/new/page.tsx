@@ -1,8 +1,8 @@
 "use client";
 import { savePageAction } from "@/actions/save-page";
-import EditorCanvas from "@/components/editor/EditorCanvas";
-import PropertiesPanel from "@/components/editor/PropertiesPanel";
-import EditorSidebar from "@/components/editor/Sidebar";
+import EditorCanvas from "@/components/Editor/EditorCanvas";
+import PropertiesPanel from "@/components/Editor/PropertiesPanel";
+import EditorSidebar from "@/components/Editor/Sidebar";
 import { useEditorStore } from "@/store/useEditorStore";
 
 export default function NewPageEditor() {

@@ -4,7 +4,7 @@ import { GridContainerProps } from "@/lib/types";
 import { EditorBlock } from "@/store/useEditorStore";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
-import DynamicBlockWrapper from "../editor/wrappers/DynamicBlockWrapper";
+import DynamicBlockWrapper from "../Editor/Wrappers/DynamicBlockWrapper";
 
 function GridContainerEditor({
   columns = 2,
