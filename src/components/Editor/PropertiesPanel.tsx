@@ -5,25 +5,25 @@ import { SectionHeading } from "@/lib/ui/SectionHeading";
 import { TextInput } from "@/lib/ui/TextInput";
 
 // Property Components
-import NavbarBlock from "./properties/NavbarBlock";
-import HeroSection from "./properties/HeroSection";
-import CustomButton from "./properties/CustomButton";
-import TextBlock from "./properties/TextBlock";
-import ImageBlock from "./properties/ImageBlock";
-import GridContainer from "./properties/GridContainer";
-import ContainerSection from "./properties/ContainerSection";
-import MetricsGrid from "./properties/MetricsGrid";
-import SpacerBlock from "./properties/SpacerBlock";
-import DividerBlock from "./properties/DividerBlock";
-import VideoBlock from "./properties/VideoBlock";
-import AccordionBlock from "./properties/AccordionBlock";
-import TestimonialBlock from "./properties/TestimonialBlock";
-import PricingTableBlock from "./properties/PricingTableBlock";
-import SidebarNavBlock from "./properties/SidebarNavBlock";
-import FooterBlock from "./properties/FooterBlock";
-import ContactFormBlock from "./properties/ContactFormBlock";
-import CardBlock from "./properties/CardBlock";
-import SocialLinksBlock from "./properties/SocialLinksBlock";
+import NavbarBlock from "./Properties/NavbarBlock";
+import HeroSection from "./Properties/HeroSection";
+import CustomButton from "./Properties/CustomButton";
+import TextBlock from "./Properties/TextBlock";
+import ImageBlock from "./Properties/ImageBlock";
+import GridContainer from "./Properties/GridContainer";
+import ContainerSection from "./Properties/ContainerSection";
+import MetricsGrid from "./Properties/MetricsGrid";
+import SpacerBlock from "./Properties/SpacerBlock";
+import DividerBlock from "./Properties/DividerBlock";
+import VideoBlock from "./Properties/VideoBlock";
+import AccordionBlock from "./Properties/AccordionBlock";
+import TestimonialBlock from "./Properties/TestimonialBlock";
+import PricingTableBlock from "./Properties/PricingTableBlock";
+import SidebarNavBlock from "./Properties/SidebarNavBlock";
+import FooterBlock from "./Properties/FooterBlock";
+import ContactFormBlock from "./Properties/ContactFormBlock";
+import CardBlock from "./Properties/CardBlock";
+import SocialLinksBlock from "./Properties/SocialLinksBlock";
 
 const findBlockInTree = (
   blocks: EditorBlock[],
