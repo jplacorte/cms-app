@@ -34,13 +34,13 @@ export function ColorInput({
           {isTransparent ? "Solid" : "None"}
         </button>
       </div>
-      
-      <div 
+
+      <div
         className={`flex items-center gap-2 p-1 border border-slate-200 rounded bg-white focus-within:border-blue-500 transition-colors ${
           isTransparent ? "opacity-50" : ""
         }`}
       >
-        <div 
+        <div
           className="relative w-6 h-6 rounded border border-slate-200 overflow-hidden shrink-0"
           style={{ backgroundColor: isTransparent ? "#ffffff" : value }}
         >
@@ -52,13 +52,13 @@ export function ColorInput({
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] cursor-pointer opacity-0"
           />
         </div>
-        
+
         <input
           type="text"
           value={value}
           disabled={isTransparent}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full text-xs text-black border-none outline-none bg-transparent font-mono"
+          className="w-full text-xs uppercase text-black border-none outline-none bg-transparent font-mono"
           placeholder="#FFFFFF"
         />
       </div>

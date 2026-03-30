@@ -84,7 +84,7 @@ export default function HeroBlock({
       style={{ backgroundColor: bgColor }}
     >
       {showAmbientGlow && (
-        <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-200 h-150 bg-blue-600/10 blur-[120px] rounded-full pointer-events-none" />
       )}
 
       <div
